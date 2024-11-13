@@ -6,34 +6,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
     header("Location: index.php");
     exit();
 }
-
-// Handling the scheduling form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Process the form input
-    $event_title = $_POST['event_title'];
-    $event_date = $_POST['event_date'];
-    $event_time = $_POST['event_time'];
-    $event_description = $_POST['event_description'];
-
-    // Validate form inputs
-    if (empty($event_title) || empty($event_date) || empty($event_time)) {
-        $error_message = "Please fill in all required fields.";
-    } else {
-        // Store event in session (or you can store it in a database)
-        if (!isset($_SESSION['scheduled_events'])) {
-            $_SESSION['scheduled_events'] = [];
-        }
-
-        $_SESSION['scheduled_events'][] = [
-            'title' => $event_title,
-            'date' => $event_date,
-            'time' => $event_time,
-            'description' => $event_description
-        ];
-
-        $success_message = "Event scheduled successfully!";
-    }
-}
 ?>
 
 <!DOCTYPE html>
@@ -41,8 +13,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TipTopLearn - Calendar</title>
+    <title>TipTopLearn - My Schedules</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         /* Custom Styles for Sidebar */
         .sidebar {
@@ -109,41 +82,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         /* Custom Styles for Content */
         .content {
             margin-left: 270px;
+            padding: 40px;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .event-list {
             padding: 20px;
-        }
-
-        .form-container {
-            background-color: #f9f9f9;
-            padding: 30px;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            background-color: #f9f9f9;
         }
 
-        .form-container h3 {
+        .event-list h3 {
             text-align: center;
             color: #007bff;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
         }
 
-        .form-container form input,
-        .form-container form textarea {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+        .event-item {
+            background-color: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
         }
 
-        .form-container form button {
-            width: 100%;
-            padding: 12px;
-            background-color: #007bff;
-            border: none;
-            color: #fff;
-            border-radius: 5px;
+        .event-item:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            transform: translateY(-5px);
         }
 
-        .form-container form button:hover {
-            background-color: #0056b3;
+        .event-item h5 {
+            font-size: 22px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .event-item p {
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .event-item .date-time {
+            font-weight: bold;
+            color: #007bff;
         }
 
         .alert {
@@ -164,8 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <h3>Teacher's Panel</h3>
         <p>Teacher</p>
     </div>
-
-    <!-- Navigation Links inside Sidebar -->
+<!-- Navigation Links inside Sidebar -->
     <nav>
         <a href="teacher_dashboard.php" class="nav-link">Dashboard</a>
         <a href="course-management.php" class="nav-link">Course Management</a>
@@ -186,6 +169,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <a class="dropdown-item" href="scheduling.php">Scheduling</a>
             </div>
         </div>
+    
 
         <a href="update_profile.php" class="nav-link">Update Profile</a>
     </nav>
@@ -196,24 +180,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!-- Main Content -->
 <div class="content">
-    <div class="form-container">
-        <h3>Schedule an Event</h3>
+    <div class="event-list">
+        <h3>My Scheduled Events</h3>
 
-        <!-- Display success or error message -->
-        <?php if (isset($success_message)): ?>
-            <div class="alert alert-success"><?php echo $success_message; ?></div>
-        <?php elseif (isset($error_message)): ?>
-            <div class="alert alert-danger"><?php echo $error_message; ?></div>
+        <?php if (isset($_SESSION['scheduled_events']) && count($_SESSION['scheduled_events']) > 0): ?>
+            <?php foreach ($_SESSION['scheduled_events'] as $event): ?>
+                <div class="event-item">
+                    <h5><?php echo htmlspecialchars($event['title']); ?></h5>
+                    <p class="date-time"><strong>Date & Time:</strong> <?php echo htmlspecialchars($event['date']); ?> at <?php echo htmlspecialchars($event['time']); ?></p>
+                    <p><strong>Description:</strong> <?php echo nl2br(htmlspecialchars($event['description'])); ?></p>
+                </div>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <div class="alert alert-warning">
+                <strong>No events scheduled yet!</strong> You have not scheduled any events at the moment.
+            </div>
         <?php endif; ?>
-
-        <!-- Schedule Event Form -->
-        <form method="POST" action="calendar.php">
-            <input type="text" name="event_title" class="form-control" placeholder="Event Title" required>
-            <input type="date" name="event_date" class="form-control" required>
-            <input type="time" name="event_time" class="form-control" required>
-            <textarea name="event_description" class="form-control" placeholder="Event Description"></textarea>
-            <button type="submit">Schedule Event</button>
-        </form>
     </div>
 </div>
 

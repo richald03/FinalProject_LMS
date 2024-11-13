@@ -12,7 +12,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TipTopLearn - Teacher's Panel</title>
+    <title>TipTopLearn - Update Profile</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         /* Custom Styles for Sidebar */
@@ -117,15 +117,15 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
 
     <!-- Navigation Links inside Sidebar -->
     <nav>
-        <a href="#dashboard" class="nav-link">Dashboard</a>
-        <a href="#course-management" class="nav-link">Course Management</a>
-        <a href="#student-management" class="nav-link">Student Management</a>
+        <a href="teacher_dashboard.php" class="nav-link">Dashboard</a>
+        <a href="course_management.php" class="nav-link">Course Management</a>
+        <a href="student_management.php" class="nav-link">Student Management</a>
 
         <div class="dropdown">
             <a href="#" class="nav-link dropdown-toggle" id="gradingDropdown" role="button">Assignment/Grading</a>
             <div class="dropdown-menu">
-                <a class="dropdown-item" href="#assignments">Assignments</a>
-                <a class="dropdown-item" href="#grading">Grading</a>
+                <a class="dropdown-item" href="assignments.php">Assignments</a>
+                <a class="dropdown-item" href="grading.php">Grading</a>
             </div>
         </div>
 
@@ -146,23 +146,8 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
 
 <!-- Main Content -->
 <div class="content">
-    <div id="dashboard" style="display:none;">
-        <h2>Dashboard</h2>
-        <p>Welcome to your dashboard.</p>
-    </div>
-    
-    <div id="course-management" style="display:none;">
-        <h2>Course Management</h2>
-        <p>Manage your courses here.</p>
-    </div>
-    
-    <div id="student-management" style="display:none;">
-        <h2>Student Management</h2>
-        <p>Manage students here.</p>
-    </div>
-
     <!-- Update Profile Section -->
-    <div id="update-profile" class="update-profile-form" style="display:none;">
+    <div class="update-profile-form">
         <h2>Update Profile</h2>
         <form>
             <div class="form-group">
@@ -217,8 +202,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
 
     // Cancel button to go back to the dashboard
     document.getElementById('cancel-button').addEventListener('click', function() {
-        document.getElementById('update-profile').style.display = 'none';
-        document.getElementById('dashboard').style.display = 'block';
+        window.location.href = 'teacher_dashboard.php';  // Go back to the dashboard page
     });
 </script>
 
