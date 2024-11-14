@@ -118,7 +118,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
     <!-- Navigation Links inside Sidebar -->
     <nav>
         <a href="#dashboard" class="nav-link">Dashboard</a>
-        <a href="#course-management" class="nav-link">Course Management</a>
+        <a href="course_management.php" class="nav-link">Course Management</a>
         <a href="#student-management" class="nav-link">Student Management</a>
 
         <div class="dropdown">
