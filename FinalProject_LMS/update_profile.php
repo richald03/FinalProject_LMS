@@ -1,9 +1,126 @@
 <?php
 session_start();
 
+// Include the database connection file
+require 'db.php'; 
+
+// Ensure the user is logged in and is a teacher
 if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
     header("Location: index.php");
     exit();
+}
+// Get the teacher's current user ID
+$user_id = $_SESSION['user_id'];
+
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $errors = [];
+    $first_name = trim($_POST['first_name']);
+    $last_name = trim($_POST['last_name']);
+    $email = trim($_POST['email']);
+    $new_password = $_POST['new-password'];
+    $confirm_password = $_POST['confirm-password'];
+
+    // Validate name and email (basic validation)
+    if (empty($first_name) || empty($last_name)) {
+        $errors[] = "Fields cannot be empty.";
+    }
+    // Check if the new password matches the confirm password
+    if (!empty($new_password) && $new_password !== $confirm_password) {
+        $errors[] = "Passwords do not match.";
+    }
+
+    // Check if there are no errors
+    if (empty($errors)) {
+        // If password is updated, hash it
+        if (!empty($new_password)) {
+            $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
+        } else {
+            $hashed_password = null; // No change to password
+        }
+
+        // Handle profile picture upload
+        $profile_picture_path = null;
+        if (isset($_FILES['profile-picture']) && $_FILES['profile-picture']['error'] == 0) {
+            $profile_picture = $_FILES['profile-picture'];
+            $target_dir = "uploads/profile_pictures/"; // Target directory
+            $target_file = $target_dir . basename($profile_picture["name"]);
+            $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+
+            // Check if the file is a valid image
+            if (getimagesize($profile_picture["tmp_name"]) === false) {
+                $errors[] = "File is not an image.";
+            }
+
+            // Check file size (max 5MB)
+            if ($profile_picture["size"] > 5000000) {
+                $errors[] = "Sorry, your file is too large.";
+            }
+
+            // Allow only certain file formats (jpg, jpeg, png, gif)
+            if (!in_array($imageFileType, ['jpg', 'jpeg', 'png', 'gif'])) {
+                $errors[] = "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
+            }
+
+            // Upload the file if no errors
+            if (empty($errors)) {
+                if (move_uploaded_file($profile_picture["tmp_name"], $target_file)) {
+                    $profile_picture_path = $target_file; // Save the file path
+                } else {
+                    $errors[] = "Sorry, there was an error uploading your file.";
+                }
+            }
+        }
+
+        // If there are no errors, update the database
+        if (empty($errors)) {
+            $sql = "UPDATE users SET first_name = ?, last_name = ?, email = ?";
+            $params = [$first_name, $last_name, $email];
+
+            // If password is updated, add it to the SQL query
+            if (!empty($hashed_password)) {
+                $sql .= ", password = ?";
+                $params[] = $hashed_password;
+            }
+
+            // If profile picture is uploaded, add it to the SQL query
+            if (!empty($profile_picture_path)) {
+                $sql .= ", profile_picture = ?";
+                $params[] = $profile_picture_path;
+            }
+
+            $sql .= " WHERE id = ?"; // Ensure you update only the current user
+            $params[] = $user_id;
+
+            // Prepare the SQL statement
+            if ($stmt = $conn->prepare($sql)) {
+                // Bind the parameters to the statement
+                $stmt->bind_param(str_repeat('s', count($params) - 1) . 'i', ...$params);
+
+                // Execute the query
+                if ($stmt->execute()) {
+                    // Update session variables with the new profile details
+                    $_SESSION['first_name'] = $first_name;
+                    $_SESSION['last_name'] = $last_name;
+                    $_SESSION['email'] = $email;
+                    if (!empty($profile_picture_path)) {
+                        $_SESSION['profile_picture'] = $profile_picture_path;
+                    }
+
+                    // Set success message in the session
+                    $_SESSION['success_message'] = "Profile updated successfully!";
+                    header("Location: update_profile.php");
+                    exit();
+                } else {
+                    $errors[] = "Error updating profile: " . $stmt->error;
+                }
+
+                $stmt->close();
+            } else {
+                $errors[] = "Error preparing statement: " . $conn->error;
+            }
+        }
+    }
 }
 ?>
 
@@ -36,7 +153,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
             border-radius: 50%;
             width: 80px;
             height: 80px;
-            margin-top: 10px;
         }
         .sidebar nav a {
             display: block;
@@ -110,7 +226,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
     </div>
 
     <div class="text-center mb-4">
-        <img src="profile-placeholder.png" alt="Profile Picture" class="profile-picture">
+    <img src="<?php echo $_SESSION['profile_picture'] ?? 'uploads/profile_pictures/default.jpg'; ?>" alt="Profile Picture" class="profile-picture">
         <h3>Teacher's Panel</h3>
         <p>Teacher</p>
     </div>
@@ -149,30 +265,52 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
     <!-- Update Profile Section -->
     <div class="update-profile-form">
         <h2>Update Profile</h2>
-        <form>
+
+        <?php if (isset($_SESSION['success_message'])): ?>
+            <div class="alert alert-success">
+                <?php echo $_SESSION['success_message']; ?>
+                <?php unset($_SESSION['success_message']); ?>
+            </div>
+        <?php endif; ?>
+
+        <!-- Handle errors and show them to the user -->
+        <?php if (!empty($errors)): ?>
+        <div class="alert alert-danger">
+        <?php foreach ($errors as $error): ?>
+        <p><?php echo $error; ?></p>
+        <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
+
+        <form method="POST" enctype="multipart/form-data">
             <div class="form-group">
-                <label for="name">Full Name</label>
-                <input type="text" class="form-control" id="name" placeholder="Enter your full name">
+                <label for="first-name">First Name</label>
+                <input type="text" class="form-control" id="first-name" name="first_name" placeholder="Enter your first name" value="<?php echo htmlspecialchars($first_name ?? ''); ?>">
+            </div>
+
+            <div class="form-group">
+                <label for="last-name">Last Name</label>
+                <input type="text" class="form-control" id="last-name" name="last_name" placeholder="Enter your last name" value="<?php echo htmlspecialchars($last_name ?? ''); ?>">
             </div>
 
             <div class="form-group">
                 <label for="email">Email address</label>
-                <input type="email" class="form-control" id="email" placeholder="Enter your email">
+                <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" value="<?php echo htmlspecialchars($email ?? ''); ?>">
             </div>
 
             <div class="form-group">
                 <label for="new-password">New Password</label>
-                <input type="password" class="form-control" id="new-password" placeholder="Enter a new password">
+                <input type="password" class="form-control" id="new-password" name="new-password" placeholder="Enter a new password">
             </div>
 
             <div class="form-group">
                 <label for="confirm-password">Confirm Password</label>
-                <input type="password" class="form-control" id="confirm-password" placeholder="Confirm your new password">
+                <input type="password" class="form-control" id="confirm-password" name="confirm-password" placeholder="Confirm your new password">
             </div>
 
             <div class="form-group">
                 <label for="profile-picture">Profile Picture</label>
-                <input type="file" class="form-control-file" id="profile-picture">
+                <input type="file" class="form-control-file" id="profile-picture" name="profile-picture">
             </div>
 
             <button type="submit" class="btn btn-primary">Update Profile</button>

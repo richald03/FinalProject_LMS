@@ -1,39 +1,57 @@
 <?php
 session_start();
 
-// Ensure the teacher is logged in
+include 'db.php';
+
 if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
     header("Location: index.php");
     exit();
 }
+
+$teacher_id = $_SESSION['user_id'];
 
 // Handling the scheduling form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Process the form input
     $event_title = $_POST['event_title'];
     $event_date = $_POST['event_date'];
-    $event_time = $_POST['event_time'];
+    $event_start_time = $_POST['event_start_time'];
+    $event_end_time = $_POST['event_end_time'];
     $event_description = $_POST['event_description'];
 
     // Validate form inputs
-    if (empty($event_title) || empty($event_date) || empty($event_time)) {
+    if (empty($event_title) || empty($event_date) || empty($event_start_time) || empty($event_end_time)) {
         $error_message = "Please fill in all required fields.";
     } else {
-        // Store event in session (or you can store it in a database)
-        if (!isset($_SESSION['scheduled_events'])) {
-            $_SESSION['scheduled_events'] = [];
+        // Insert the event into the database
+        $query = "INSERT INTO scheduled_events (teacher_id, title, date, time, end_time, description, created_at) 
+                  VALUES (?, ?, ?, ?, ?, ?, NOW())";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("isssss", $teacher_id, $event_title, $event_date, $event_start_time, $event_end_time, $event_description);
+
+        if ($stmt->execute()) {
+            $success_message = "Event scheduled successfully!";
+        } else {
+            $error_message = "Failed to schedule event. Please try again.";
         }
-
-        $_SESSION['scheduled_events'][] = [
-            'title' => $event_title,
-            'date' => $event_date,
-            'time' => $event_time,
-            'description' => $event_description
-        ];
-
-        $success_message = "Event scheduled successfully!";
+        $stmt->close();
     }
 }
+
+// Fetch scheduled events for the logged-in teacher
+$scheduled_events = [];
+$query = "SELECT title, date, time, end_time, description FROM scheduled_events WHERE teacher_id = ? ORDER BY date, time";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $teacher_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+while ($row = $result->fetch_assoc()) {
+    $scheduled_events[] = $row;
+}
+
+$stmt->close();
+$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -68,7 +86,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border-radius: 50%;
             width: 80px;
             height: 80px;
-            margin-top: 10px;
         }
 
         .sidebar nav a {
@@ -160,7 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <div class="text-center mb-4">
-        <img src="profile-placeholder.png" alt="Profile Picture" class="profile-picture">
+    <img src="<?php echo $_SESSION['profile_picture'] ?? 'uploads/profile_pictures/default.jpg'; ?>" alt="Profile Picture" class="profile-picture">
         <h3>Teacher's Panel</h3>
         <p>Teacher</p>
     </div>
@@ -210,12 +227,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <form method="POST" action="calendar.php">
             <input type="text" name="event_title" class="form-control" placeholder="Event Title" required>
             <input type="date" name="event_date" class="form-control" required>
-            <input type="time" name="event_time" class="form-control" required>
+            <label for="event_start_time">Start Time</label>
+            <input type="time" name="event_start_time" class="form-control" required>
+            <label for="event_end_time">End Time</label>
+            <input type="time" name="event_end_time" class="form-control" required>
             <textarea name="event_description" class="form-control" placeholder="Event Description"></textarea>
             <button type="submit">Schedule Event</button>
         </form>
     </div>
-</div>
 
 <!-- Bootstrap JS and jQuery -->
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>

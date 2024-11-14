@@ -1,27 +1,30 @@
 <?php
-// Database connection
-$dsn = 'mysql:host=localhost;dbname=lms_db';
-$username = 'root';
-$password = '';
-
-try {
-    $pdo = new PDO($dsn, $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    echo "Connection failed: " . $e->getMessage();
-}
+session_start();
+include 'db.php';
 
 // Fetch all courses from the database
-$courses = $pdo->query("SELECT * FROM courses")->fetchAll(PDO::FETCH_ASSOC);
+$sql = "SELECT * FROM courses";
+$courses = [];
+$result = $conn->query($sql);
+if ($result->num_rows > 0) {
+    // Fetch courses as an associative array
+    while($row = $result->fetch_assoc()) {
+        $courses[] = $row;
+    }
+}
 
 // Handle adding new course
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['course_name'], $_POST['course_description']) && !isset($_GET['edit_id'])) {
     $course_name = $_POST['course_name'];
     $course_description = $_POST['course_description'];
 
-    $stmt = $pdo->prepare("INSERT INTO courses (name, description) VALUES (?, ?)");
-    $stmt->execute([$course_name, $course_description]);
+    // Prepare and execute INSERT statement
+    $stmt = $conn->prepare("INSERT INTO courses (name, description) VALUES (?, ?)");
+    $stmt->bind_param("ss", $course_name, $course_description);  // "ss" indicates two string parameters
+    $stmt->execute();
+    $stmt->close();
 
+    // Redirect to course management page after adding course
     header("Location: course_management.php");
     exit;
 }
@@ -31,19 +34,23 @@ if (isset($_GET['edit_id'])) {
     $course_id = $_GET['edit_id'];
 
     // Fetch the course details based on the provided id
-    $stmt = $pdo->prepare("SELECT * FROM courses WHERE id = ?");
-    $stmt->execute([$course_id]);
-    $course = $stmt->fetch(PDO::FETCH_ASSOC);
+    $stmt = $conn->prepare("SELECT * FROM courses WHERE id = ?");
+    $stmt->bind_param("i", $course_id);  // "i" indicates an integer parameter
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $course = $result->fetch_assoc();
+    $stmt->close();
 
     // When the form is submitted for editing the course
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['course_name'], $_POST['course_description'])) {
-        // Get the updated data from the form
         $course_name = $_POST['course_name'];
         $course_description = $_POST['course_description'];
 
-        // Update the course details in the database
-        $stmt = $pdo->prepare("UPDATE courses SET name = ?, description = ? WHERE id = ?");
-        $stmt->execute([$course_name, $course_description, $course_id]);
+        // Prepare and execute UPDATE statement
+        $stmt = $conn->prepare("UPDATE courses SET name = ?, description = ? WHERE id = ?");
+        $stmt->bind_param("ssi", $course_name, $course_description, $course_id);  
+        $stmt->execute();
+        $stmt->close();
 
         // Redirect to course management page after saving changes
         header("Location: course_management.php");
@@ -54,9 +61,14 @@ if (isset($_GET['edit_id'])) {
 // Handle deleting course
 if (isset($_GET['delete_id'])) {
     $course_id = $_GET['delete_id'];
-    $stmt = $pdo->prepare("DELETE FROM courses WHERE id = ?");
-    $stmt->execute([$course_id]);
 
+    // Prepare and execute DELETE statement
+    $stmt = $conn->prepare("DELETE FROM courses WHERE id = ?");
+    $stmt->bind_param("i", $course_id);  
+    $stmt->execute();
+    $stmt->close();
+
+    // Redirect to course management page after deleting course
     header("Location: course_management.php");
     exit;
 }
@@ -64,14 +76,59 @@ if (isset($_GET['delete_id'])) {
 // Function to generate a random color
 function getRandomColor() {
     $colors = [
-        '#ffadad', '#ffd6a5', '#fdffb6', '#caffbf', '#9bf6ff', '#a0c4ff', '#bdb2ff', '#ffc6ff', '#f7c4b1', '#d0f0c0',
-        '#ffb3e6', '#ffcc99', '#ffdf00', '#ff6f61', '#ff9e9e', '#ffb8b8', '#e6e6fa', '#f5f5dc', '#fafad2', '#ffe4e1',
-        '#ffe4b5', '#ffdead', '#faf0e6', '#e0ffff', '#f0fff0', '#f0f8ff', '#f5fffa', '#f8f8ff', '#fffaf0', '#ffffe0',
-        '#d8bfd8', '#dda0dd', '#ee82ee', '#e6e6fa', '#c5e1a5', '#e1bee7', '#ffccbc', '#b2dfdb', '#ffcdd2', '#d1c4e9',
-        '#c8e6c9', '#ffecb3', '#bbdefb', '#ffab91', '#ff80ab', '#ce93d8', '#9fa8da', '#90caf9', '#a5d6a7', '#ffeb3b',
-        '#fff176', '#aed581', '#81c784', '#4db6ac', '#81d4fa', '#80deea', '#b39ddb', '#e57373', '#a1887f', '#bcaaa4',
-        '#e1bee7', '#ffcc80', '#ffb74d', '#ffab91', '#fff59d', '#e0e0e0', '#ffebee', '#fce4ec', '#f3e5f5', '#ede7f6',
-        '#e0f7fa', '#e0f2f1', '#f1f8e9', '#fff3e0', '#ffccbc', '#ffe0b2'
+    '#F0E1FF',  // Soft Lavender
+    '#E0F7FA',  // Light Aqua
+    '#FFE4E1',  // Misty Rose
+    '#B2EBF2',  // Light Cyan
+    '#D1C4E9',  // Lavender
+    '#FFF8E1',  // Light Lemon
+    '#FFCDD2',  // Soft Pink
+    '#E8F5E9',  // Light Mint Green
+    '#F1F8E9',  // Pale Green
+    '#FFEB3B',  // Yellow Sunshine
+    '#B3E5FC',  // Baby Blue
+    '#FFCC80',  // Soft Apricot
+    '#FFB74D',  // Light Orange
+    '#C5E1A5',  // Pale Olive Green
+    '#FFEBEE',  // Light Blush
+    '#D1C4E9',  // Light Lavender
+    '#C8E6C9',  // Soft Green
+    '#FFE0B2',  // Warm Peach
+    '#F3E5F5',  // Lavender Blush
+    '#FFB3E6',  // Light Pink
+    '#A5D6A7',  // Soft Mint
+    '#B39DDB',  // Light Purple
+    '#FCE4EC',  // Light Pink Blush
+    '#B2DFDB',  // Aqua Blue
+    '#FFDF00',  // Bright Yellow
+    '#FF6F61',  // Coral Red
+    '#F5F5F5',  // Light Grey
+    '#F0F8FF',  // Alice Blue
+    '#FFAB91',  // Light Coral
+    '#FF9E9E',  // Soft Rose
+    '#FFCC99',  // Light Peach
+    '#E0FFFF',  // Light Cyan
+    '#FFECBC',  // Light Butter
+    '#FFDAE9',  // Soft Lavender Pink
+    '#E6E6FA',  // Lavender Mist
+    '#FFF59D',  // Light Yellow
+    '#FFE4B5',  // Moccasin
+    '#F7C4B1',  // Soft Peach
+    '#E1BEE7',  // Lavender Mist
+    '#FFFAF0',  // Floral White
+    '#FFDFD4',  // Peachy Pink
+    '#F0FFF0',  // Honeydew Green
+    '#F0F9FF',  // Pale Sky Blue
+    '#FFD6A5',  // Soft Peach
+    '#E8EAF6',  // Soft Lavender Blue
+    '#D0F0C0',  // Pale Mint Green
+    '#C8E6C9',  // Mint Green
+    '#FFF3E0',  // Light Cream
+    '#E1DEE1',  // Misty Lavender
+    '#FFEE58',  // Light Yellow-Green
+    '#FFB8B8',  // Soft Rose
+    '#FF9F9F',  // Pale Pink
+    '#BBDEFB',  // Light Blue
     ];      
     return $colors[array_rand($colors)];
 }
@@ -163,7 +220,6 @@ function getRandomColor() {
             border-radius: 50%;
             width: 80px;
             height: 80px;
-            margin-top: 10px;
         }
         .sidebar nav a {
             display: block;
@@ -251,7 +307,7 @@ function getRandomColor() {
     </div>
 
     <div class="text-center mb-4">
-        <img src="profile-placeholder.png" alt="Profile Picture" class="profile-picture">
+    <img src="<?php echo $_SESSION['profile_picture'] ?? 'uploads/profile_pictures/default.jpg'; ?>" alt="Profile Picture" class="profile-picture">
         <h3>Teacher's Panel</h3>
         <p>Teacher</p>
     </div>
@@ -290,7 +346,7 @@ function getRandomColor() {
         <!-- Add New Course Button on Top-Right -->
         <button class="btn btn-primary top-right-button" data-toggle="modal" data-target="#addCourseModal">Add New Course</button>
 
-        <h2 class="text-center mb-4">Course Management</h2>
+        <h2 class="text-center mb-4">My Courses</h2>
 
         <!-- Course List -->
         <div class="row">

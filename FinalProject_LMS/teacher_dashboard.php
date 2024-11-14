@@ -36,7 +36,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
             border-radius: 50%;
             width: 80px;
             height: 80px;
-            margin-top: 10px;
         }
         .sidebar nav a {
             display: block;
@@ -110,7 +109,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
     </div>
 
     <div class="text-center mb-4">
-        <img src="profile-placeholder.png" alt="Profile Picture" class="profile-picture">
+    <img src="<?php echo $_SESSION['profile_picture'] ?? 'uploads/profile_pictures/default.jpg'; ?>" alt="Profile Picture" class="profile-picture">
         <h3>Teacher's Panel</h3>
         <p>Teacher</p>
     </div>
