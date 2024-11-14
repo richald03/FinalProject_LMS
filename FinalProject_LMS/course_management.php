@@ -63,8 +63,16 @@ if (isset($_GET['delete_id'])) {
 
 // Function to generate a random color
 function getRandomColor() {
-  $colors = ['#ffadad', '#ffd6a5', '#fdffb6', '#caffbf', '#9bf6ff', '#a0c4ff', '#bdb2ff', '#ffc6ff', '#fffffc', 
-          '#f7c4b1', '#d0f0c0', '#ffb3e6', '#ffcc99', '#ffdf00', '#ff6f61', '#ff9e9e', '#ffb8b8'];
+    $colors = [
+        '#ffadad', '#ffd6a5', '#fdffb6', '#caffbf', '#9bf6ff', '#a0c4ff', '#bdb2ff', '#ffc6ff', '#f7c4b1', '#d0f0c0',
+        '#ffb3e6', '#ffcc99', '#ffdf00', '#ff6f61', '#ff9e9e', '#ffb8b8', '#e6e6fa', '#f5f5dc', '#fafad2', '#ffe4e1',
+        '#ffe4b5', '#ffdead', '#faf0e6', '#e0ffff', '#f0fff0', '#f0f8ff', '#f5fffa', '#f8f8ff', '#fffaf0', '#ffffe0',
+        '#d8bfd8', '#dda0dd', '#ee82ee', '#e6e6fa', '#c5e1a5', '#e1bee7', '#ffccbc', '#b2dfdb', '#ffcdd2', '#d1c4e9',
+        '#c8e6c9', '#ffecb3', '#bbdefb', '#ffab91', '#ff80ab', '#ce93d8', '#9fa8da', '#90caf9', '#a5d6a7', '#ffeb3b',
+        '#fff176', '#aed581', '#81c784', '#4db6ac', '#81d4fa', '#80deea', '#b39ddb', '#e57373', '#a1887f', '#bcaaa4',
+        '#e1bee7', '#ffcc80', '#ffb74d', '#ffab91', '#fff59d', '#e0e0e0', '#ffebee', '#fce4ec', '#f3e5f5', '#ede7f6',
+        '#e0f7fa', '#e0f2f1', '#f1f8e9', '#fff3e0', '#ffccbc', '#ffe0b2'
+    ];      
     return $colors[array_rand($colors)];
 }
 ?>
@@ -82,7 +90,7 @@ function getRandomColor() {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
     font-size: 22px; 
     font-weight: 700; 
-    color: #333333; 
+    color: #000000 !important; 
     line-height: 1.4; 
     margin-bottom: 15px; 
     text-transform: capitalize; 
@@ -251,7 +259,7 @@ function getRandomColor() {
     <nav>
         <a href="teacher_dashboard.php" class="nav-link">Dashboard</a>
         <a href="course_management.php" class="nav-link">Course Management</a>
-        <a href="#student_management.php" class="nav-link">Student Management</a>
+        <a href="student_management.php" class="nav-link">Student Management</a>
 
         <div class="dropdown">
             <a href="#" class="nav-link dropdown-toggle" id="gradingDropdown" role="button">Assignment/Grading</a>

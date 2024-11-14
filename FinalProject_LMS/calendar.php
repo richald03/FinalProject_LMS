@@ -169,7 +169,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <nav>
         <a href="teacher_dashboard.php" class="nav-link">Dashboard</a>
         <a href="course_management.php" class="nav-link">Course Management</a>
-        <a href="student-management.php" class="nav-link">Student Management</a>
+        <a href="student_management.php" class="nav-link">Student Management</a>
 
         <div class="dropdown">
             <a href="#" class="nav-link dropdown-toggle" id="gradingDropdown" role="button">Assignment/Grading</a>
