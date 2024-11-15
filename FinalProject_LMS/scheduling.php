@@ -38,136 +38,191 @@ $conn->close();
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         /* Custom Styles for Sidebar */
-.sidebar {
-    width: 250px;
-    background-color: #66a3ff;
-    color: #fff;
-    height: 100vh;
-    padding: 20px;
-    position: fixed;
-}
+        .sidebar {
+            width: 250px;
+            background-color: #66a3ff;
+            color: #fff;
+            height: 100vh;
+            padding: 20px;
+            position: fixed;
+        }
 
-.sidebar .logo-section img {
-    width: 80px;
-    height: 80px;
-}
+        .sidebar .logo-section img {
+            width: 80px;
+            height: 80px;
+        }
 
-.sidebar .logo-section h2 {
-    font-size: 24px;
-    color: #333;
-}
+        .sidebar .logo-section h2 {
+            font-size: 24px;
+            color: #333;
+        }
 
-.sidebar .profile-picture {
-    border-radius: 50%;
-    width: 80px;
-    height: 80px;
-}
+        .sidebar .profile-picture {
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+        }
 
-.sidebar nav a {
-    display: block;
-    color: #fff;
-    text-decoration: none;
-    padding: 10px;
-    text-align: center;
-    margin-top: 10px;
-    border-radius: 5px;
-    background-color: #007bff;
-}
+        .sidebar nav a {
+            display: block;
+            color: #fff;
+            text-decoration: none;
+            padding: 10px;
+            text-align: center;
+            margin-top: 10px;
+            border-radius: 5px;
+            background-color: #007bff;
+        }
 
-.sidebar nav a:hover {
-    background-color: #0056b3;
-}
+        .sidebar nav a:hover {
+            background-color: #0056b3;
+        }
 
-.sidebar .dropdown:hover .dropdown-menu {
-    display: block;
-}
+        .sidebar .dropdown:hover .dropdown-menu {
+            display: block;
+        }
 
-.sidebar .dropdown .dropdown-menu {
-    display: none;
-    position: static;
-    float: none;
-    background-color: #66a3ff;
-}
+        .sidebar .dropdown .dropdown-menu {
+            display: none;
+            position: static;
+            float: none;
+            background-color: #66a3ff;
+        }
 
-.sidebar .dropdown .dropdown-item {
-    color: #fff;
-    padding: 8px 20px;
-}
+        .sidebar .dropdown .dropdown-item {
+            color: #fff;
+            padding: 8px 20px;
+        }
 
-.sidebar .dropdown .dropdown-item:hover {
-    background-color: #0056b3;
-}
+        .sidebar .dropdown .dropdown-item:hover {
+            background-color: #0056b3;
+        }
 
-/* Custom Styles for Content */
-.content {
-    margin-left: 270px;
-    padding: 40px;
-    font-family: 'Roboto', sans-serif;
-}
+        /* Custom Styles for Content */
+        .content {
+            margin-left: 270px;
+            padding: 40px;
+            font-family: 'Roboto', sans-serif;
+        }
 
-/* Added Box Shadow, Padding, and Border to Event List */
-.event-list {
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    background-color: #f9f9f9;
-    border: 1px solid #ddd; /* Add a subtle border */
-    margin-bottom: 20px;
-}
+        /* Added Box Shadow, Padding, and Border to Event List */
+        .event-list {
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            background-color: #f9f9f9;
+            border: 1px solid #ddd; /* Add a subtle border */
+            margin-bottom: 20px;
+        }
 
-.event-list h3 {
-    text-align: center;
-    color: #007bff;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-}
+        .event-list h3 {
+            text-align: center;
+            color: #007bff;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+        }
 
-/* Added Hover Effects and Border to Event Items */
-.event-item {
-    background-color: #fff;
-    padding: 20px;
-    margin-bottom: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-    border: 1px solid #ddd; /* Border for event items */
-    background-color: #ffffff;
-}
+        /* Added Hover Effects and Border to Event Items */
+        .event-item {
+            background-color: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid #ddd; /* Border for event items */
+            background-color: #ffffff;
+        }
 
-.event-item:hover {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    transform: translateY(-5px);
-    border: 1px solid #007bff; /* Highlight border on hover */
-}
+        .event-item:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            transform: translateY(-5px);
+            border: 1px solid #007bff; /* Highlight border on hover */
+        }
 
-/* Styled Event Title */
-.event-item h5 {
-    font-size: 22px;
-    color: #333;
-    font-weight: 600;
-    margin-bottom: 10px;
-}
+        /* Styled Event Title */
+        .event-item h5 {
+            font-size: 22px;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
 
-/* Styled Paragraphs for Event Description and Date */
-.event-item p {
-    margin: 5px 0;
-    color: #666;
-}
+        /* Styled Paragraphs for Event Description and Date */
+        .event-item p {
+            margin: 5px 0;
+            color: #666;
+        }
 
-.event-item .date-time {
-    font-weight: bold;
-    color: #007bff;
-}
+        .event-item .date-time {
+            font-weight: bold;
+            color: #007bff;
+        }
 
-/* Alert Style */
-.alert {
-    margin-bottom: 20px;
-    border-radius: 8px;
-    padding: 15px;
-    background-color: #f8d7da;
-    color: #721c24;
-}
+        /* Alert Style */
+        .alert {
+            margin-bottom: 20px;
+            border-radius: 8px;
+            padding: 15px;
+            background-color: #f8d7da;
+            color: #721c24;
+        }
 
+        /* Media Queries for Responsiveness */
+        @media (max-width: 768px) {
+            /* Sidebar for Small Screens */
+            .sidebar {
+                width: 200px;
+                position: relative;
+                height: auto;
+            }
+            .content {
+                margin-left: 0;
+                padding: 20px;
+            }
+            .sidebar .logo-section img {
+                width: 60px;
+                height: 60px;
+            }
+            .sidebar .profile-picture {
+                width: 60px;
+                height: 60px;
+            }
+            .sidebar nav a {
+                padding: 8px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            /* Sidebar for Very Small Screens */
+            .sidebar {
+                width: 100%;
+                padding: 10px;
+            }
+            .content {
+                margin-left: 0;
+                padding: 10px;
+            }
+            .sidebar .logo-section img {
+                width: 50px;
+                height: 50px;
+            }
+            .sidebar .profile-picture {
+                width: 50px;
+                height: 50px;
+            }
+            .sidebar nav a {
+                font-size: 12px;
+                padding: 6px;
+            }
+            .event-list {
+                padding: 15px;
+            }
+            .event-item {
+                padding: 15px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -192,7 +247,7 @@ $conn->close();
         <div class="dropdown">
             <a href="#" class="nav-link dropdown-toggle" id="gradingDropdown" role="button">Assignment/Grading</a>
             <div class="dropdown-menu">
-                <a class="dropdown-item" href="assignments.php">Assignments</a>
+                <a class="dropdown-item" href="assignment.php">Assignments</a>
                 <a class="dropdown-item" href="grading.php">Grading</a>
             </div>
         </div>

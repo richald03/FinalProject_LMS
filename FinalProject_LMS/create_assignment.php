@@ -1,56 +1,63 @@
 <?php
 session_start();
+include 'db.php'; // Include your database connection file
 
-include 'db.php';
+// Error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
-    header("Location: index.php");
-    exit();
-}
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Retrieve form data
+    $title = $_POST['assignment_title'] ?? '';
+    $description = $_POST['assignment_description'] ?? '';
+    $due_date = $_POST['due_date'] ?? '';
 
-$teacher_id = $_SESSION['user_id'];
+    // Validate required fields
+    if (empty($title) || empty($description) || empty($due_date)) {
+        $_SESSION['error_message'] = "All fields are required.";
+        header("Location: create_assignment.php");
+        exit();
+    }
 
-// Handling the scheduling form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Process the form input
-    $event_title = $_POST['event_title'];
-    $event_date = $_POST['event_date'];
-    $event_start_time = $_POST['event_start_time'];
-    $event_end_time = $_POST['event_end_time'];
-    $event_description = $_POST['event_description'];
+    // Handle file upload
+    $file_name = null;
+    if (isset($_FILES['assignment_file']) && $_FILES['assignment_file']['error'] == 0) {
+        $file_name = basename($_FILES['assignment_file']['name']);
+        $target_dir = "uploads/assignments/";
+        $target_file = $target_dir . $file_name;
 
-    // Validate form inputs
-    if (empty($event_title) || empty($event_date) || empty($event_start_time) || empty($event_end_time)) {
-        $error_message = "Please fill in all required fields.";
-    } else {
-        // Insert the event into the database
-        $query = "INSERT INTO scheduled_events (teacher_id, title, date, time, end_time, description, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())";
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param("isssss", $teacher_id, $event_title, $event_date, $event_start_time, $event_end_time, $event_description);
+        // Ensure the uploads directory exists
+        if (!is_dir($target_dir)) {
+            mkdir($target_dir, 0777, true);
+        }
 
+        // Move uploaded file to the target directory
+        if (!move_uploaded_file($_FILES['assignment_file']['tmp_name'], $target_file)) {
+            $_SESSION['error_message'] = "Failed to upload file.";
+            header("Location: create_assignment.php");
+            exit();
+        }
+    }
+
+    // Insert data into the database
+    $sql = "INSERT INTO assignments (title, description, due_date, file) VALUES (?, ?, ?, ?)";
+    if ($stmt = $conn->prepare($sql)) {
+        $stmt->bind_param("ssss", $title, $description, $due_date, $file_name);
         if ($stmt->execute()) {
-            $success_message = "Event scheduled successfully!";
+            $_SESSION['success_message'] = "Assignment created successfully!";
         } else {
-            $error_message = "Failed to schedule event. Please try again.";
+            $_SESSION['error_message'] = "Database error: " . $stmt->error;
         }
         $stmt->close();
+    } else {
+        $_SESSION['error_message'] = "Failed to prepare the SQL statement: " . $conn->error;
     }
+
+    // Redirect to the form page
+    header("Location: create_assignment.php");
+    exit();
 }
-
-// Fetch scheduled events for the logged-in teacher
-$scheduled_events = [];
-$query = "SELECT title, date, time, end_time, description FROM scheduled_events WHERE teacher_id = ? ORDER BY date, time";
-$stmt = $conn->prepare($query);
-$stmt->bind_param("i", $teacher_id);
-$stmt->execute();
-$result = $stmt->get_result();
-
-while ($row = $result->fetch_assoc()) {
-    $scheduled_events[] = $row;
-}
-
-$stmt->close();
-$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -58,7 +65,7 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TipTopLearn - Calendar</title>
+    <title>Create Assignment</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         /* Custom Styles for Sidebar */
@@ -271,30 +278,38 @@ $conn->close();
 
 <!-- Main Content -->
 <div class="content">
-    <div class="form-container">
-        <h3>Schedule an Event</h3>
-
-        <!-- Display success or error message -->
-        <?php if (isset($success_message)): ?>
-            <div class="alert alert-success"><?php echo $success_message; ?></div>
-        <?php elseif (isset($error_message)): ?>
-            <div class="alert alert-danger"><?php echo $error_message; ?></div>
+    <div class="container">
+        <h2>Create Assignment</h2>
+        
+        <!-- Display success or error messages -->
+        <?php if (isset($_SESSION['success_message'])): ?>
+            <div class="alert alert-success"><?= $_SESSION['success_message']; unset($_SESSION['success_message']); ?></div>
+        <?php elseif (isset($_SESSION['error_message'])): ?>
+            <div class="alert alert-danger"><?= $_SESSION['error_message']; unset($_SESSION['error_message']); ?></div>
         <?php endif; ?>
 
-        <!-- Schedule Event Form -->
-        <form method="POST" action="calendar.php">
-            <input type="text" name="event_title" class="form-control" placeholder="Event Title" required>
-            <input type="date" name="event_date" class="form-control" required>
-            <label for="event_start_time">Start Time</label>
-            <input type="time" name="event_start_time" class="form-control" required>
-            <label for="event_end_time">End Time</label>
-            <input type="time" name="event_end_time" class="form-control" required>
-            <textarea name="event_description" class="form-control" placeholder="Event Description"></textarea>
-            <button type="submit">Schedule Event</button>
+        <form action="create_assignment.php" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="assignment_title">Assignment Title</label>
+                <input type="text" id="assignment_title" name="assignment_title" class="form-control" placeholder="Enter assignment title" required>
+            </div>
+            <div class="form-group">
+                <label for="assignment_description">Assignment Description</label>
+                <textarea id="assignment_description" name="assignment_description" class="form-control" rows="5" placeholder="Describe the assignment" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="due_date">Due Date</label>
+                <input type="date" id="due_date" name="due_date" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="assignment_file">Upload File (optional)</label>
+                <input type="file" id="assignment_file" name="assignment_file" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-primary">Create Assignment</button>
         </form>
     </div>
+</div>
 
-<!-- Bootstrap JS and jQuery -->
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 

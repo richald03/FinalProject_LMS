@@ -142,63 +142,6 @@ function getRandomColor() {
     <title>Course Management</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
-
-.card-title {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-    font-size: 22px; 
-    font-weight: 700; 
-    color: #000000 !important; 
-    line-height: 1.4; 
-    margin-bottom: 15px; 
-    text-transform: capitalize; 
-}
-
-.card-text {
-    font-family: 'Roboto', sans-serif;
-    font-size: 16px;
-    font-weight: 400; 
-    color: #555555; 
-    line-height: 1.6; 
-    letter-spacing: 0.5px; 
-    margin-bottom: 20px; 
-}
-
-.card {
-    background-color: #ffffff; 
-    border: 1px solid #e0e0e0; 
-    border-radius: 8px; 
-    padding: 20px; 
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
-    height: 350px; 
-}
-
-.btn-spacing {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px; 
-    justify-content: flex-start; 
-    margin-top: 15px;
-}
-
-/* Adjust button size and alignment */
-.btn-custom {
-    background-color: #007bff;
-    color: #fff;
-    padding: 8px 15px; 
-}
-
-.btn-custom:hover {
-    background-color: #0056b3;
-}
-
-.btn-danger, .btn-secondary {
-    padding: 8px 15px;
-}
-
-.btn-sm {
-    font-size: 14px; 
-    padding: 6px 12px; 
-}
         /* Sidebar Styles */
         .sidebar {
             width: 250px;
@@ -208,19 +151,23 @@ function getRandomColor() {
             padding: 20px;
             position: fixed;
         }
+
         .sidebar .logo-section img {
             width: 80px;
             height: 80px;
         }
+
         .sidebar .logo-section h2 {
             font-size: 24px;
             color: #333;
         }
+
         .sidebar .profile-picture {
             border-radius: 50%;
             width: 80px;
             height: 80px;
         }
+
         .sidebar nav a {
             display: block;
             color: #fff;
@@ -231,24 +178,27 @@ function getRandomColor() {
             border-radius: 5px;
             background-color: #007bff;
         }
+
         .sidebar nav a:hover {
             background-color: #0056b3;
         }
 
-        /* Dropdown hover styles */
         .sidebar .dropdown:hover .dropdown-menu {
             display: block;
         }
+
         .sidebar .dropdown .dropdown-menu {
             display: none;
             position: static;
             float: none;
             background-color: #66a3ff;
         }
+
         .sidebar .dropdown .dropdown-item {
             color: #fff;
             padding: 8px 20px;
         }
+
         .sidebar .dropdown .dropdown-item:hover {
             background-color: #0056b3;
         }
@@ -259,42 +209,109 @@ function getRandomColor() {
             padding: 20px;
         }
 
-        /* Card Styles */
         .container {
             margin-top: 20px;
         }
+
         .card {
             border: 1px solid #ddd; 
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s ease;
             padding: 20px;
-            min-height: 250px; 
+            display: flex;
+            flex-direction: column;
+            height: 90%;
         }
+
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 10px; 
+        }
+
+        .btn-spacing {
+            display: flex;
+            flex-direction: column; 
+            gap: 10px;
+        } 
+
         .card:hover {
             transform: translateY(-5px);
         }
+
         .card-title {
             color: #007bff;
         }
+
         .btn-custom {
             background-color: #007bff;
             color: #fff;
             margin-bottom: 10px;
         }
+
         .btn-custom:hover {
             background-color: #0056b3;
         }
-        .btn-spacing {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 10px;
+
+        /* Large Screens (Sidebar fixed on the left) */
+        @media (min-width: 768px) {
+            .sidebar {
+                position: fixed;
+                height: 100vh;
+            }
+
+            .content {
+                margin-left: 250px; 
+            }
+
+            .top-right-button {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+            }
         }
-        .top-right-button {
-            position: absolute;
-            top: 20px;
-            right: 20px;
+
+        /* Small Screens (Sidebar at the top) */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 10px;
+            }
+
+            .content {
+                margin-left: 0;
+            }
+
+            .top-right-button {
+                position: relative;
+                top: 0;
+                right: 0;
+            }
+
+            .sidebar nav a {
+                padding: 8px;
+                font-size: 14px;
+            }
+        }
+        /* Modal responsiveness */
+        @media (max-width: 576px) {
+            .modal-dialog {
+                max-width: 100%;
+                margin: 15px;
+            }
+
+            .modal-body {
+                padding: 10px;
+            }
+
+            .form-control {
+                font-size: 14px;
+                padding: 8px;
+            }
         }
     </style>
 </head>
@@ -307,7 +324,7 @@ function getRandomColor() {
     </div>
 
     <div class="text-center mb-4">
-    <img src="<?php echo $_SESSION['profile_picture'] ?? 'uploads/profile_pictures/default.jpg'; ?>" alt="Profile Picture" class="profile-picture">
+        <img src="<?php echo $_SESSION['profile_picture'] ?? 'uploads/profile_pictures/default.jpg'; ?>" alt="Profile Picture" class="profile-picture">
         <h3>Teacher's Panel</h3>
         <p>Teacher</p>
     </div>
@@ -320,7 +337,7 @@ function getRandomColor() {
         <div class="dropdown">
             <a href="#" class="nav-link dropdown-toggle" id="gradingDropdown" role="button">Assignment/Grading</a>
             <div class="dropdown-menu">
-                <a class="dropdown-item" href="#assignments.php">Assignments</a>
+                <a class="dropdown-item" href="assignment.php">Assignments</a>
                 <a class="dropdown-item" href="#grading.php">Grading</a>
             </div>
         </div>
@@ -360,7 +377,7 @@ function getRandomColor() {
                                 <!-- Edit Course Button -->
                                 <button class="btn btn-custom btn-sm" data-toggle="modal" data-target="#editCourseModal<?= $course['id'] ?>">Edit Course</button>
                                 <a href="course_management.php?delete_id=<?= $course['id'] ?>" class="btn btn-danger btn-sm">Delete Course</a>
-                                <a href="manage_assignments.php?course_id=<?= $course['id'] ?>" class="btn btn-secondary btn-sm">Assignments</a>
+                                <a href="create_assignment.php?course_id=<?= $course['id'] ?>" class="btn btn-secondary btn-sm">Assignments</a>
                                 <a href="manage_modules.php?course_id=<?= $course['id'] ?>" class="btn btn-secondary btn-sm">Modules</a>
                                 <a href="manage_quizzes.php?course_id=<?= $course['id'] ?>" class="btn btn-secondary btn-sm">Quizzes</a>
                             </div>
@@ -434,7 +451,7 @@ function getRandomColor() {
 </div>
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

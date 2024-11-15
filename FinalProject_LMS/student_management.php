@@ -22,12 +22,11 @@ $result = $conn->query($sql);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background: url(images/bg.jpg);
-            background-repeat: no-repeat;
-            background-position: center;
+            background: url(images/bg.jpg) no-repeat center center fixed;
             background-size: cover;
             font-family: 'Arial', sans-serif;
             padding: 30px;
+            height: 100vh; /* Full viewport height */
         }
 
         .container {
@@ -35,6 +34,8 @@ $result = $conn->query($sql);
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
         h1 {
@@ -82,10 +83,11 @@ $result = $conn->query($sql);
             background-color: #6c757d;
             color: white;
             text-decoration: none;
-            padding: 10px 20px;
+            padding: 12px 24px; /* Increased padding for mobile */
             border-radius: 5px;
             margin-top: 20px;
             font-size: 1rem;
+            display: inline-block;
         }
 
         .back-btn:hover {
@@ -96,6 +98,15 @@ $result = $conn->query($sql);
             font-size: 1rem;
             color: #d9534f;
             margin-top: 20px;
+        }
+
+        /* Ensure the button stays centered on smaller screens */
+        @media (max-width: 576px) {
+            .back-btn {
+                width: 100%;
+                padding: 14px; /* Larger padding on mobile */
+                text-align: center;
+            }
         }
     </style>
 </head>
@@ -108,7 +119,8 @@ $result = $conn->query($sql);
     <?php
     // Check if there are any students in the database
     if ($result->num_rows > 0) {
-        echo "<table class='table table-striped'>
+        echo "<div class='table-responsive'>
+                <table class='table table-striped'>
                 <thead>
                     <tr>
                         <th>Student ID</th>
@@ -131,7 +143,7 @@ $result = $conn->query($sql);
                 </tr>";
         }
 
-        echo "</tbody></table>";
+        echo "</tbody></table></div>";
     } else {
         echo "<p class='alert'>No students found.</p>";
     }

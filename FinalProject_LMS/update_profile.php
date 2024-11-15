@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// Include the database connection file
 require 'db.php'; 
 
 // Ensure the user is logged in and is a teacher
@@ -43,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $profile_picture_path = null;
         if (isset($_FILES['profile-picture']) && $_FILES['profile-picture']['error'] == 0) {
             $profile_picture = $_FILES['profile-picture'];
-            $target_dir = "uploads/profile_pictures/"; // Target directory
+            $target_dir = "uploads/profile_pictures/"; 
             $target_file = $target_dir . basename($profile_picture["name"]);
             $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
@@ -65,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Upload the file if no errors
             if (empty($errors)) {
                 if (move_uploaded_file($profile_picture["tmp_name"], $target_file)) {
-                    $profile_picture_path = $target_file; // Save the file path
+                    $profile_picture_path = $target_file; 
                 } else {
                     $errors[] = "Sorry, there was an error uploading your file.";
                 }
@@ -132,51 +131,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>TipTopLearn - Update Profile</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* Custom Styles for Sidebar */
-        .sidebar {
-            width: 250px;
-            background-color: #66a3ff; 
-            color: #fff;
-            height: 100vh;
-            padding: 20px;
-            position: fixed;
-        }
-        .sidebar .logo-section img {
-            width: 80px;
-            height: 80px;
-        }
-        .sidebar .logo-section h2 {
-            font-size: 24px;
-            color: #333;
-        }
-        .sidebar .profile-picture {
-            border-radius: 50%;
-            width: 80px;
-            height: 80px;
-        }
-        .sidebar nav a {
-            display: block;
-            color: #fff;
-            text-decoration: none;
-            padding: 10px;
-            text-align: center;
-            margin-top: 10px;
-            border-radius: 5px;
-            background-color: #007bff;
-        }
-        .sidebar nav a:hover {
-            background-color: #0056b3;
-        }
+    /* Custom Styles for Sidebar */
+    .sidebar {
+        width: 250px;
+        background-color: #66a3ff; 
+        color: #fff;
+        height: 100vh;
+        padding: 20px;
+        position: fixed;
+    }
 
-        /* Dropdown hover styles */
-        .sidebar .dropdown:hover .dropdown-menu {
+    .sidebar .logo-section img {
+        width: 80px;
+        height: 80px;
+    }
+
+    .sidebar .logo-section h2 {
+        font-size: 24px;
+        color: #333;
+    }
+
+    .sidebar .profile-picture {
+        border-radius: 50%;
+        width: 80px;
+        height: 80px;
+    }
+
+    .sidebar nav a {
+        display: block;
+        color: #fff;
+        text-decoration: none;
+        padding: 10px;
+        text-align: center;
+        margin-top: 10px;
+        border-radius: 5px;
+        background-color: #007bff;
+    }
+
+    .sidebar nav a:hover {
+        background-color: #0056b3;
+    }
+
+    /* Dropdown hover styles */
+    .sidebar .dropdown:hover .dropdown-menu {
             display: block;
         }
         .sidebar .dropdown .dropdown-menu {
             display: none;
             position: static;
             float: none;
-            background-color: #66a3ff; /* Match the sidebar background */
+            background-color: #66a3ff; 
         }
         .sidebar .dropdown .dropdown-item {
             color: #fff;
@@ -186,36 +190,102 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background-color: #0056b3;
         }
 
-        /* Custom Styles for Content */
+    /* Custom Styles for Content */
+    .content {
+        margin-left: 250px;
+        padding: 20px;
+    }
+
+    .update-profile-form {
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .update-profile-form h2 {
+        color: #007bff;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .cancel-btn {
+        width: 100%;
+        padding: 12px;
+        background-color: #f0f0f0;
+        border: 1px solid #ddd;
+        color: #333;
+        font-size: 16px;
+    }
+
+    .cancel-btn:hover {
+        background-color: #e1e1e1;
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 1024px) {
+        .sidebar {
+            width: 200px;
+        }
+
         .content {
-            margin-left: 250px;
+            margin-left: 200px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        /* Sidebar and Content Layout */
+        .sidebar {
+            width: 100%;
+            position: static;
+            height: auto;
+            padding: 15px;
+        }
+
+        .content {
+            margin-left: 0;
+        }
+
+        /* Form adjustments */
+        .update-profile-form {
+            width: 90%;
             padding: 20px;
         }
-        .update-profile-form {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .update-profile-form h2 {
-            color: #007bff;
-            margin-bottom: 20px;
-            text-align: center;
-        }
+
         .cancel-btn {
             width: 100%;
-            padding: 12px;
-            background-color: #f0f0f0;
-            border: 1px solid #ddd;
-            color: #333;
-            font-size: 16px;
         }
-        .cancel-btn:hover {
-            background-color: #e1e1e1;
+    }
+
+    @media (max-width: 576px) {
+        /* Profile Picture in Sidebar */
+        .sidebar .profile-picture {
+            width: 60px;
+            height: 60px;
         }
-    </style>
+
+        .sidebar .logo-section img {
+            width: 60px;
+            height: 60px;
+        }
+
+        .sidebar nav a {
+            padding: 8px;
+        }
+
+        .update-profile-form {
+            width: 100%;
+            padding: 15px;
+        }
+
+        /* Buttons */
+        .cancel-btn {
+            padding: 10px;
+        }
+    }
+</style>
 </head>
 <body>
 
@@ -240,7 +310,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="dropdown">
             <a href="#" class="nav-link dropdown-toggle" id="gradingDropdown" role="button">Assignment/Grading</a>
             <div class="dropdown-menu">
-                <a class="dropdown-item" href="assignments.php">Assignments</a>
+                <a class="dropdown-item" href="assignment.php">Assignments</a>
                 <a class="dropdown-item" href="grading.php">Grading</a>
             </div>
         </div>

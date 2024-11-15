@@ -59,7 +59,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
             display: none;
             position: static;
             float: none;
-            background-color: #66a3ff; /* Match the sidebar background */
+            background-color: #66a3ff; 
         }
         .sidebar .dropdown .dropdown-item {
             color: #fff;
@@ -123,7 +123,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
         <div class="dropdown">
             <a href="#" class="nav-link dropdown-toggle" id="gradingDropdown" role="button">Assignment/Grading</a>
             <div class="dropdown-menu">
-                <a class="dropdown-item" href="#assignments">Assignments</a>
+                <a class="dropdown-item" href="assignment.php">Assignments</a>
                 <a class="dropdown-item" href="#grading">Grading</a>
             </div>
         </div>
