@@ -67,6 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Assignment</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <style>
         /* Custom Styles for Sidebar */
         .sidebar {
@@ -157,7 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         .form-container form button {
-            width: 100%;
+            width: 48%;
             padding: 12px;
             background-color: #007bff;
             border: none;
@@ -167,6 +168,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         .form-container form button:hover {
             background-color: #0056b3;
+        }
+
+        .back-btn {
+            width: 48%;
+            padding: 12px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            color: #007bff;
+            border-radius: 5px;
+            text-align: center;
+            display: inline-block;
+            text-decoration: none;
+            vertical-align: top;
+        }
+
+        .back-btn i {
+            margin-right: 8px;
         }
 
         .alert {
@@ -288,25 +306,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div class="alert alert-danger"><?= $_SESSION['error_message']; unset($_SESSION['error_message']); ?></div>
         <?php endif; ?>
 
-        <form action="create_assignment.php" method="POST" enctype="multipart/form-data">
-            <div class="form-group">
-                <label for="assignment_title">Assignment Title</label>
-                <input type="text" id="assignment_title" name="assignment_title" class="form-control" placeholder="Enter assignment title" required>
-            </div>
-            <div class="form-group">
-                <label for="assignment_description">Assignment Description</label>
-                <textarea id="assignment_description" name="assignment_description" class="form-control" rows="5" placeholder="Describe the assignment" required></textarea>
-            </div>
-            <div class="form-group">
-                <label for="due_date">Due Date</label>
-                <input type="date" id="due_date" name="due_date" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="assignment_file">Upload File (optional)</label>
-                <input type="file" id="assignment_file" name="assignment_file" class="form-control">
-            </div>
-            <button type="submit" class="btn btn-primary">Create Assignment</button>
-        </form>
+        <div class="form-container">
+            <form action="create_assignment.php" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="assignment_title">Assignment Title</label>
+                    <input type="text" id="assignment_title" name="assignment_title" class="form-control" placeholder="Enter assignment title" required>
+                </div>
+                <div class="form-group">
+                    <label for="assignment_description">Assignment Description</label>
+                    <textarea id="assignment_description" name="assignment_description" class="form-control" rows="5" placeholder="Describe the assignment" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="due_date">Due Date</label>
+                    <input type="date" id="due_date" name="due_date" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="assignment_file">Upload File (optional)</label>
+                    <input type="file" id="assignment_file" name="assignment_file" class="form-control">
+                </div>
+                <div class="d-flex justify-content-between">
+                    <a href="course_management.php" class="back-btn">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </a>
+                    <button type="submit" class="btn btn-primary">Create Assignment</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 

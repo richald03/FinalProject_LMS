@@ -38,6 +38,14 @@ $result = $conn->query($sql);
             margin: 0 auto;
         }
 
+        a {
+            text-decoration: none;
+            color: black;
+            }
+
+        table a:hover {
+            color: red;
+            }
         h1 {
             text-align: center;
             margin-bottom: 20px;
@@ -136,8 +144,8 @@ $result = $conn->query($sql);
         while ($row = $result->fetch_assoc()) {
             echo "<tr>
                     <td>" . htmlspecialchars($row['student_id']) . "</td>
-                    <td>" . htmlspecialchars($row['first_name']) . "</td>
-                    <td>" . htmlspecialchars($row['last_name']) . "</td>
+                    <td><a href='grading.php?id=" . htmlspecialchars($row['student_id']) . "'>" . htmlspecialchars($row['first_name']) . "</a></td>
+                    <td><a href='grading.php?id=" . htmlspecialchars($row['student_id']) . "'>" . htmlspecialchars($row['last_name']) . "</a></td>
                     <td>" . htmlspecialchars($row['email']) . "</td>
                     <td>" . htmlspecialchars($row['gender']) . "</td>
                 </tr>";

@@ -338,7 +338,7 @@ function getRandomColor() {
             <a href="#" class="nav-link dropdown-toggle" id="gradingDropdown" role="button">Assignment/Grading</a>
             <div class="dropdown-menu">
                 <a class="dropdown-item" href="assignment.php">Assignments</a>
-                <a class="dropdown-item" href="#grading.php">Grading</a>
+                <a class="dropdown-item" href="grading.php">Grading</a>
             </div>
         </div>
 
@@ -367,24 +367,46 @@ function getRandomColor() {
 
         <!-- Course List -->
         <div class="row">
-            <?php foreach ($courses as $course): ?>
-                <div class="col-md-4">
-                    <div class="card mb-4" style="background-color: <?= getRandomColor() ?>;">
-                        <div class="card-body">
-                            <h5 class="card-title"><?= htmlspecialchars($course['name']) ?></h5>
-                            <p class="card-text"><?= htmlspecialchars($course['description']) ?></p>
-                            <div class="btn-spacing">
-                                <!-- Edit Course Button -->
-                                <button class="btn btn-custom btn-sm" data-toggle="modal" data-target="#editCourseModal<?= $course['id'] ?>">Edit Course</button>
-                                <a href="course_management.php?delete_id=<?= $course['id'] ?>" class="btn btn-danger btn-sm">Delete Course</a>
-                                <a href="create_assignment.php?course_id=<?= $course['id'] ?>" class="btn btn-secondary btn-sm">Assignments</a>
-                                <a href="manage_modules.php?course_id=<?= $course['id'] ?>" class="btn btn-secondary btn-sm">Modules</a>
-                                <a href="manage_quizzes.php?course_id=<?= $course['id'] ?>" class="btn btn-secondary btn-sm">Quizzes</a>
-                            </div>
-                        </div>
+    <?php foreach ($courses as $course): ?>
+        <div class="col-md-4">
+            <div class="card mb-4" style="background-color: <?= getRandomColor() ?>;">
+                <div class="card-body">
+                    <h5 class="card-title"><?= htmlspecialchars($course['name']) ?></h5>
+                    <p class="card-text"><?= htmlspecialchars($course['description']) ?></p>
+                    <div class="btn-spacing">
+                        <!-- Edit Course Button -->
+                        <button class="btn btn-custom btn-sm" data-toggle="modal" data-target="#editCourseModal<?= $course['id'] ?>">
+                            <img src="images/edit.png" alt="Assignments" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 5px;" />
+                            Edit Course
+                        </button>
+                        
+                        <!-- Delete Course Button with Confirmation -->
+                        <a href="course_management.php?delete_id=<?= $course['id'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this course?');"> 
+                            <img src="images/delete.png" alt="Assignments" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 5px;" />
+                            Delete Course
+                            </a>
+                        
+                        <!-- Assignments Button with Favicon -->
+                        <a href="create_assignment.php?course_id=<?= $course['id'] ?>" class="btn btn-secondary btn-sm">
+                            <img src="images/assignment.png" alt="Assignments" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 5px;" />
+                            Assignments
+                        </a>
+                        
+                        <!-- Modules Button with Favicon -->
+                        <a href="module.php?course_id=<?= $course['id'] ?>" class="btn btn-secondary btn-sm">
+                            <img src="images/module.png" alt="Modules" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 5px;" />
+                            Modules
+                        </a>
+                        
+                        <!-- Quizzes Button with Favicon -->
+                        <a href="quizzes.php?course_id=<?= $course['id'] ?>" class="btn btn-secondary btn-sm">
+                            <img src="images/quiz.png" alt="Quizzes" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 5px;" />
+                            Quizzes
+                        </a>
                     </div>
                 </div>
-
+            </div>
+        </div>
                 <!-- Edit Course Modal -->
                 <div class="modal fade" id="editCourseModal<?= $course['id'] ?>" tabindex="-1" role="dialog" aria-labelledby="editCourseModalLabel" aria-hidden="true">
                     <div class="modal-dialog" role="document">
@@ -414,7 +436,6 @@ function getRandomColor() {
                         </div>
                     </div>
                 </div>
-
             <?php endforeach; ?>
         </div>
     </div>

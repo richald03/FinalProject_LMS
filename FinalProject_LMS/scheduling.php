@@ -12,7 +12,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
 $teacher_id = $_SESSION['user_id'];
 
 // Fetch scheduled events from the database for the logged-in teacher
-$query = "SELECT title, date, time, end_time, description FROM scheduled_events WHERE teacher_id = ? ORDER BY date, time";
+$query = "SELECT id, title, date, time, end_time, description FROM scheduled_events WHERE teacher_id = ? ORDER BY date, time";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $teacher_id);
 $stmt->execute();
@@ -275,11 +275,23 @@ $conn->close();
 
         <?php if (count($scheduled_events) > 0): ?>
             <?php foreach ($scheduled_events as $event): ?>
-                <div class="event-item">
-                    <h5><?php echo htmlspecialchars($event['title']); ?></h5>
-                    <p class="date-time"><strong>Date:</strong> <?php echo htmlspecialchars($event['date']); ?> | 
-                    <strong>Time:</strong> <?php echo htmlspecialchars($event['time']); ?> - <?php echo htmlspecialchars($event['end_time']); ?></p>
-                    <p><strong>Description:</strong> <?php echo nl2br(htmlspecialchars($event['description'])); ?></p>
+                <div class="event-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5><?php echo htmlspecialchars($event['title']); ?></h5>
+                        <p class="date-time"><strong>Date:</strong> <?php echo htmlspecialchars($event['date']); ?> | 
+                        <strong>Time:</strong> <?php echo htmlspecialchars($event['time']); ?> - <?php echo htmlspecialchars($event['end_time']); ?></p>
+                        <p><strong>Description:</strong> <?php echo nl2br(htmlspecialchars($event['description'])); ?></p>
+                    </div>
+                    <!-- Edit and Delete Buttons -->
+                    <div class="ml-4 d-flex flex-column align-items-center">
+                    <a href="edit_schedule.php?id=<?php echo $event['id']; ?>" title="Edit Event">
+                    <img src="images/edit-button.png" alt="Edit" style="width: 24px; height: 24px; margin-bottom: 10px;">
+                    </a>
+                    <a href="delete_schedule.php?id=<?php echo $event['id']; ?>" title="Delete Event" onclick="return confirm('Are you sure you want to delete this event?');">
+                    <img src="images/trash.png" alt="Delete" style="width: 24px; height: 24px;">
+                    </a>
+                </div>
+
                 </div>
             <?php endforeach; ?>
         <?php else: ?>

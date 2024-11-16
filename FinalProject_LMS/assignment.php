@@ -299,33 +299,41 @@ $stmt->close();
 
         <!-- Assignments List -->
         <ul class="assignment-list">
-            <?php if (empty($assignments)): ?>
-                <li class="alert alert-warning">No assignments found.</li>
-            <?php else: ?>
-                <?php foreach ($assignments as $assignment): ?>
-                    <li class="assignment-item">
-                        <div class="assignment-title">
-                            <?= htmlspecialchars($assignment['title']); ?>
-                        </div>
-                        <div class="assignment-info">
-                            <p><strong>Description:</strong> <?= htmlspecialchars($assignment['description']); ?></p>
-                            <p><strong>Due Date:</strong> <?= htmlspecialchars($assignment['due_date']); ?></p>
-                            <p><strong>File:</strong>
-                                <?php if ($assignment['file']): ?>
-                                    <a href="uploads/assignments/<?= $assignment['file']; ?>" target="_blank">View Assignment</a>
-                                <?php else: ?>
-                                    No File
-                                <?php endif; ?>
-                            </p>
-                        </div>
-                        <div class="assignment-actions">
-                            <a href="edit_assignment.php?id=<?= $assignment['id']; ?>" class="btn btn-custom btn-custom-edit">Edit</a>
-                            <a href="?delete_id=<?= $assignment['id']; ?>" class="btn btn-custom btn-custom-delete" onclick="return confirm('Are you sure you want to delete this assignment?');">Delete</a>
-                        </div>
-                    </li>
-                <?php endforeach; ?>
-            <?php endif; ?>
-        </ul>
+    <?php if (empty($assignments)): ?>
+        <li class="alert alert-warning">No assignments found.</li>
+    <?php else: ?>
+        <?php foreach ($assignments as $assignment): ?>
+            <li class="assignment-item">
+                <div class="assignment-title">
+                    <?= htmlspecialchars($assignment['title']); ?>
+                </div>
+                <div class="assignment-info">
+                    <p><strong>Description:</strong> <?= htmlspecialchars($assignment['description']); ?></p>
+                    <p><strong>Due Date:</strong> <?= htmlspecialchars($assignment['due_date']); ?></p>
+                    <p><strong>File:</strong>
+                        <?php if ($assignment['file']): ?>
+                            <a href="uploads/assignments/<?= $assignment['file']; ?>" target="_blank">View Assignment</a>
+                        <?php else: ?>
+                            No File
+                        <?php endif; ?>
+                    </p>
+                </div>
+                <div class="assignment-actions">
+                    <!-- Edit Icon (Favicon) -->
+                    <a href="edit_assignment.php?id=<?= $assignment['id']; ?>">
+                        <img src="images/edit.png" alt="Edit" style="width: 24px; height: 24px; cursor: pointer;">
+                    </a>
+
+                    <!-- Delete Icon (Favicon) -->
+                    <a href="?delete_id=<?= $assignment['id']; ?>" onclick="return confirm('Are you sure you want to delete this assignment?');">
+                        <img src="images/bin.png" alt="Delete" style="width: 24px; height: 24px; cursor: pointer;">
+                    </a>
+                </div>
+            </li>
+        <?php endforeach; ?>
+    <?php endif; ?>
+</ul>
+
     </div>
 </div>
 
