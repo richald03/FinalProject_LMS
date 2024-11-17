@@ -10,7 +10,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
 
 // Query to fetch student data along with grades and course, sorted by last name
 $sql = "SELECT u.id, u.student_id, u.first_name, u.last_name, 
-            g.prelim, g.midterm, g.final, g.grade_equivalent, g.descriptive_reading, 
+            g.prelim, g.midterm, g.final, g.grade_equivalent, 
             c.name AS course_name
         FROM users u
         LEFT JOIN grades g ON u.id = g.student_id
@@ -29,8 +29,8 @@ $result = $conn->query($sql);
     <title>Grading - LMS</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     
-    <!-- Add favicon (optional, for the whole page) -->
-    <link rel="icon" href="images/edit-icon.png" type="image/png"> <!-- Replace with your desired favicon -->
+    <!-- Add favicon -->
+    <link rel="icon" href="images/edit-icon.png" type="image/png">
 
     <style>
         body {
@@ -146,53 +146,70 @@ $result = $conn->query($sql);
                     <tr>
                         <th>ID#</th>
                         <th>Fullname</th>
-                        <th>Course</th> <!-- Added Course column -->
+                        <th>Course</th>
                         <th>Prelim</th>
                         <th>Midterm</th>
                         <th>Final</th>
                         <th>Grade Equivalent</th>
-                        <th>Descriptive Reading</th>
-                        <th>Actions</th> <!-- Actions column for Edit and Delete Grades -->
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>";
 
-        // Display each student's information
+        $previous_student_id = null; // To track the last displayed student ID
+
         while ($row = $result->fetch_assoc()) {
-            echo "<tr>
-                <td>" . htmlspecialchars($row['student_id']) . "</td>
-                <td>
-                    <a href='add_grades.php?id=" . $row['id'] . "' 
-                    style='text-decoration:none; color:black;' 
-                    onmouseover='this.style.color=\"red\";' 
-                    onmouseout='this.style.color=\"black\";'>
-                " . htmlspecialchars($row['last_name']) . ", " . htmlspecialchars($row['first_name']) . "</a>
-                </td>
-                <td>" . (isset($row['course_name']) ? htmlspecialchars($row['course_name']) : '--') . "</td> <!-- Displaying Course Name -->
-                <td>" . (isset($row['prelim']) ? htmlspecialchars($row['prelim']) : '--') . "</td>
-                <td>" . (isset($row['midterm']) ? htmlspecialchars($row['midterm']) : '--') . "</td>
-                <td>" . (isset($row['final']) ? htmlspecialchars($row['final']) : '--') . "</td>
-                <td>" . (isset($row['grade_equivalent']) ? htmlspecialchars($row['grade_equivalent']) : '--') . "</td>
-                <td>" . (isset($row['descriptive_reading']) ? htmlspecialchars($row['descriptive_reading']) : '--') . "</td>
-                <td>
-                    <a href='edit_grades.php?id=" . $row['id'] . "' class='edit-btn'>
-                        <img src='images/edit-button.png' alt='Edit' /> 
-                    </a>
-                    <a href='delete_grades.php?id=" . $row['id'] . "' class='delete-btn' onclick='return confirm(\"Are you sure you want to delete this grade?\");'>
-                        <img src='images/trash.png' alt='Delete Grades' />
-                    </a>
-                </td>
-            </tr>";
+            // Check if the student ID is the same as the previous row
+            if ($row['student_id'] !== $previous_student_id) {
+                // Display the full row for a new student
+                echo "<tr>
+                    <td>" . htmlspecialchars($row['student_id']) . "</td>
+                    <td>
+                        <a href='add_grades.php?id=" . $row['id'] . "' 
+                        style='text-decoration:none; color:black;' 
+                        onmouseover='this.style.color=\"red\";' 
+                        onmouseout='this.style.color=\"black\";'>
+                    " . htmlspecialchars($row['last_name']) . ", " . htmlspecialchars($row['first_name']) . "</a>
+                    </td>
+                    <td>" . (isset($row['course_name']) ? htmlspecialchars($row['course_name']) : '--') . "</td>
+                    <td>" . (isset($row['prelim']) ? htmlspecialchars($row['prelim']) : '--') . "</td>
+                    <td>" . (isset($row['midterm']) ? htmlspecialchars($row['midterm']) : '--') . "</td>
+                    <td>" . (isset($row['final']) ? htmlspecialchars($row['final']) : '--') . "</td>
+                    <td>" . (isset($row['grade_equivalent']) ? htmlspecialchars($row['grade_equivalent']) : '--') . "</td>
+                    <td>
+                        <a href='edit_grades.php?id=" . $row['id'] . "' class='edit-btn'>
+                            <img src='images/edit-button.png' alt='Edit' /> 
+                        </a>
+                        <a href='delete_grades.php?id=" . $row['id'] . "' class='delete-btn' onclick='return confirm(\"Are you sure you want to delete this grade?\");'>
+                            <img src='images/trash.png' alt='Delete Grades' />
+                        </a>
+                    </td>
+                </tr>";
+            } else {
+                // For the same student, display only grades
+                echo "<tr>
+                    <td></td> <!-- Empty cell for ID -->
+                    <td></td> <!-- Empty cell for Fullname -->
+                    <td>" . (isset($row['course_name']) ? htmlspecialchars($row['course_name']) : '--') . "</td>
+                    <td>" . (isset($row['prelim']) ? htmlspecialchars($row['prelim']) : '--') . "</td>
+                    <td>" . (isset($row['midterm']) ? htmlspecialchars($row['midterm']) : '--') . "</td>
+                    <td>" . (isset($row['final']) ? htmlspecialchars($row['final']) : '--') . "</td>
+                    <td>" . (isset($row['grade_equivalent']) ? htmlspecialchars($row['grade_equivalent']) : '--') . "</td>
+                    <td></td> <!-- Empty cell for Actions -->
+                </tr>";
+            }
+            // Update the previous_student_id
+            $previous_student_id = $row['student_id'];
         }
-        
+
         echo "</tbody></table></div>";
-        } else {
-            echo "<p class='alert'>No students found.</p>";
-        }
-        
-        // Close the connection
-        $conn->close();
-        ?>        
+    } else {
+        echo "<p class='alert'>No students found.</p>";
+    }
+
+    // Close the connection
+    $conn->close();
+    ?>        
 
     <!-- Back to Dashboard Button -->
     <a href="teacher_dashboard.php" class="back-btn">Back to Dashboard</a>

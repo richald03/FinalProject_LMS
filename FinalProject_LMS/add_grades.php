@@ -43,55 +43,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Grades already exist for this student and course
             echo "<script>alert('Grades for this student in this course already exist.');</script>";
         } else {
-            // If final grade is below 50, automatically fail
-            if ($final < 50) {
-                $average = 0;
-                $grade_equivalent = '5.00';
-                $descriptive_reading = 'Failed';
-            } else {
-                // Adjusted average calculation with the new weights
-                $average_midterm = ($prelim * 0.15) + $midterm;
-                $average = ($average_midterm * 0.25) + ($final * 0.60);
+            // Adjusted average calculation: Prelim + Midterm + Final / 3
+            $average = ($prelim + $midterm + $final) / 3;
 
-                // Determine the grade equivalent based on the computed average
-                if ($average >= 94) {
-                    $grade_equivalent = '1.00';
-                    $descriptive_reading = 'Excellent';
-                } elseif ($average >= 88.5) {
-                    $grade_equivalent = '1.25';
-                    $descriptive_reading = 'Superior';
-                } elseif ($average >= 83) {
-                    $grade_equivalent = '1.50';
-                    $descriptive_reading = 'Meritorious';
-                } elseif ($average >= 77.5) {
-                    $grade_equivalent = '1.75';
-                    $descriptive_reading = 'Very Good';
-                } elseif ($average >= 72) {
-                    $grade_equivalent = '2.00';
-                    $descriptive_reading = 'Good';
-                } elseif ($average >= 66.5) {
-                    $grade_equivalent = '2.25';
-                    $descriptive_reading = 'Very Satisfactory';
-                } elseif ($average >= 61) {
-                    $grade_equivalent = '2.50';
-                    $descriptive_reading = 'Satisfactory';
-                } elseif ($average >= 55.5) {
-                    $grade_equivalent = '2.75';
-                    $descriptive_reading = 'Fair';
-                } elseif ($average >= 50) {
-                    $grade_equivalent = '3.00';
-                    $descriptive_reading = 'Passing';
-                } else {
-                    $grade_equivalent = '5.00';
-                    $descriptive_reading = 'Failed';
-                }
+            // Determine grade equivalent based on the computed average
+            if ($average >= 94) {
+                $grade_equivalent = '1.00';
+            } elseif ($average >= 88.5) {
+                $grade_equivalent = '1.25';
+            } elseif ($average >= 83) {
+                $grade_equivalent = '1.50';
+            } elseif ($average >= 77.5) {
+                $grade_equivalent = '1.75';
+            } elseif ($average >= 72) {
+                $grade_equivalent = '2.00';
+            } elseif ($average >= 66.5) {
+                $grade_equivalent = '2.25';
+            } elseif ($average >= 61) {
+                $grade_equivalent = '2.50';
+            } elseif ($average >= 55.5) {
+                $grade_equivalent = '2.75';
+            } elseif ($average >= 50) {
+                $grade_equivalent = '3.00';
+            } else {
+                $grade_equivalent = '5.00';
             }
 
             // Insert grades into the grades table
-            $insert_sql = "INSERT INTO grades (student_id, course_id, prelim, midterm, final, average, grade_equivalent, descriptive_reading) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            $insert_sql = "INSERT INTO grades (student_id, course_id, prelim, midterm, final, average, grade_equivalent) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?)";
             $insert_stmt = $conn->prepare($insert_sql);
-            $insert_stmt->bind_param("iiidssss", $student_id, $course_id, $prelim, $midterm, $final, $average, $grade_equivalent, $descriptive_reading);
+            $insert_stmt->bind_param("iiidsss", $student_id, $course_id, $prelim, $midterm, $final, $average, $grade_equivalent);
             $insert_stmt->execute();
 
             // Redirect to grading page (after successful insert)
@@ -208,7 +190,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="number" step="0.01" min="0" max="100" id="final" name="final" class="form-control" oninput="calculateEquivalent()" required>
             </div>
 
-            <!-- Grade Equivalent and Descriptive Reading -->
+            <!-- Grade Equivalent -->
             <div class="remarks" id="remarks"></div>
 
             <!-- Submit Button -->
@@ -226,62 +208,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         const midterm = parseFloat(document.getElementById('midterm').value) || 0;
         const final = parseFloat(document.getElementById('final').value) || 0;
 
-        const averageMidterm = (prelim * 0.15) + midterm;
-        const average = (averageMidterm * 0.25) + (final * 0.60);
+        // New average calculation: (Prelim + Midterm + Final) / 3
+        const average = (prelim + midterm + final) / 3;
 
         let gradeEquivalent = '';
-        let descriptiveReading = '';
         let remarksClass = '';  // Variable for determining red or green style
 
         if (final < 50) {
             gradeEquivalent = '5.00';
-            descriptiveReading = 'Failed';
             remarksClass = 'failed';  // Red for failed
             document.getElementById('remarks').innerHTML = `<span class="remarks ${remarksClass}">Final grade is below 50. Student failed.</span>`;
         } else {
             if (average >= 94) {
                 gradeEquivalent = '1.00';
-                descriptiveReading = 'Excellent';
                 remarksClass = 'passed';  // Green for passed
             } else if (average >= 88.5) {
                 gradeEquivalent = '1.25';
-                descriptiveReading = 'Superior';
                 remarksClass = 'passed';
             } else if (average >= 83) {
                 gradeEquivalent = '1.50';
-                descriptiveReading = 'Meritorious';
                 remarksClass = 'passed';
             } else if (average >= 77.5) {
                 gradeEquivalent = '1.75';
-                descriptiveReading = 'Very Good';
                 remarksClass = 'passed';
             } else if (average >= 72) {
                 gradeEquivalent = '2.00';
-                descriptiveReading = 'Good';
                 remarksClass = 'passed';
             } else if (average >= 66.5) {
                 gradeEquivalent = '2.25';
-                descriptiveReading = 'Very Satisfactory';
                 remarksClass = 'passed';
             } else if (average >= 61) {
                 gradeEquivalent = '2.50';
-                descriptiveReading = 'Satisfactory';
                 remarksClass = 'passed';
             } else if (average >= 55.5) {
                 gradeEquivalent = '2.75';
-                descriptiveReading = 'Fair';
                 remarksClass = 'passed';
             } else if (average >= 50) {
                 gradeEquivalent = '3.00';
-                descriptiveReading = 'Passing';
                 remarksClass = 'passed';
             } else {
                 gradeEquivalent = '5.00';
-                descriptiveReading = 'Failed';
                 remarksClass = 'failed';
             }
 
-            document.getElementById('remarks').innerHTML = `<span class="remarks ${remarksClass}">Grade Equivalent: ${gradeEquivalent} - ${descriptiveReading}</span>`;
+            document.getElementById('remarks').innerHTML = `<span class="remarks ${remarksClass}">Grade Equivalent: ${gradeEquivalent}</span>`;
         }
     }
 </script>

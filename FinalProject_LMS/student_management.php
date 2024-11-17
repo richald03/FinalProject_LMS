@@ -147,7 +147,7 @@ $result = $conn->query($sql);
                     <td><a href='grading.php?id=" . htmlspecialchars($row['student_id']) . "'>" . htmlspecialchars($row['first_name']) . "</a></td>
                     <td><a href='grading.php?id=" . htmlspecialchars($row['student_id']) . "'>" . htmlspecialchars($row['last_name']) . "</a></td>
                     <td>" . htmlspecialchars($row['email']) . "</td>
-                    <td>" . htmlspecialchars($row['gender']) . "</td>
+                    <td>" . ucwords(htmlspecialchars($row['gender'])) . "</td>
                 </tr>";
         }
 

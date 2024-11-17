@@ -1,10 +1,60 @@
 <?php
 session_start();
+include 'db.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
     header("Location: index.php");
     exit();
 }
+// Query to fetch the number of students
+$sql = "SELECT COUNT(*) AS total_students FROM users WHERE user_type = 'student'";
+$result = $conn->query($sql);
+$row = $result->fetch_assoc();
+$total_students = $row['total_students'];
+
+// Query to fetch the number of courses
+$sql_courses = "SELECT COUNT(*) AS total_courses FROM courses";
+$result_courses = $conn->query($sql_courses);
+$row_courses = $result_courses->fetch_assoc();
+$total_courses = $row_courses['total_courses'];
+
+// Query to fetch the number of assignments
+$sql_assignments = "SELECT COUNT(*) AS total_assignments FROM assignments";
+$result_assignments = $conn->query($sql_assignments);
+$row_assignments = $result_assignments->fetch_assoc();
+$total_assignments = $row_assignments['total_assignments'];
+
+// Query to fetch the number of modules
+$sql_modules = "SELECT COUNT(*) AS total_modules FROM modules";
+$result_modules = $conn->query($sql_modules);
+$row_modules = $result_modules->fetch_assoc();
+$total_modules = $row_modules['total_modules'];
+
+// Query to fetch the number of quizzes
+$sql_quizzes = "SELECT COUNT(*) AS total_quizzes FROM quizzes";
+$result_quizzes = $conn->query($sql_quizzes);
+$row_quizzes = $result_quizzes->fetch_assoc();
+$total_quizzes = $row_quizzes['total_quizzes'];
+
+// Query to fetch the number of scheduled events
+$sql_events = "SELECT COUNT(*) AS total_events FROM scheduled_events";
+$result_events = $conn->query($sql_events);
+$row_events = $result_events->fetch_assoc();
+$total_events = $row_events['total_events'];
+
+// Search functionality
+$search_term = '';
+if (isset($_GET['search'])) {
+    $search_term = $_GET['search'];
+    $search_sql = "SELECT * FROM users WHERE user_type = 'student' AND (first_name LIKE '%$search_term%' OR last_name LIKE '%$search_term%')";
+} else {
+    $search_sql = "SELECT * FROM users WHERE user_type = 'student'";
+}
+
+$search_result = $conn->query($search_sql);
+
+// Close the connection
+$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -98,6 +148,100 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
         .cancel-btn:hover {
             background-color: #e1e1e1;
         }
+
+        /* Custom border and card styling */
+    .dashboard-card {
+        border: 2px solid #007bff; /* Blue border */
+        border-radius: 10px; /* Rounded corners */
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow */
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* Add hover effect to cards */
+    .dashboard-card:hover {
+        transform: translateY(-5px); /* Slight lift effect */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
+    }
+
+    /* Style for the icons inside the cards */
+    .favicon {
+        width: 50px;
+        height: 50px;
+        margin-bottom: 15px;
+    }
+
+    /* Title inside cards */
+    .dashboard-card h5 {
+        font-weight: bold;
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+    }
+
+    /* Paragraph text styling */
+    .dashboard-card p {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+    }
+
+    /* Customize the container's layout and spacing */
+    .container {
+        padding: 20px;
+    }
+
+    /* Hover effect for the whole card */
+    .dashboard-card {
+        background-color: #fff;
+        border: 2px solid #ddd;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: 0.3s;
+    }
+
+    /* Hover effect on the dashboard card */
+    .dashboard-card:hover {
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        transform: translateY(-5px);
+    }
+        .search-bar {
+            margin-bottom: 20px;
+        }
+        .favicon {
+            width: 45px;
+            height: 40px;
+            margin-right: 3px;
+        }
+
+            /* Image container for favicon */
+            .search-icon-container {
+                display: inline-block;
+                width: 25px; 
+                height: 22px; 
+        }
+
+              /* Style the favicon icon */
+            .search-icon {
+                width: 100%;
+                height: 100%;
+                object-fit: contain; 
+        }
+
+        /* Real-Time Clock */
+        .clock {
+        position: fixed;
+        top: 10px;
+        right: 20px;
+        background-color: #333;
+        color: #fff;
+        padding: 5px 15px;
+        border-radius: 5px;
+        font-size: 18px;
+        font-weight: bold;
+        }
+
+
     </style>
 </head>
 <body>
@@ -109,7 +253,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
     </div>
 
     <div class="text-center mb-4">
-    <img src="<?php echo $_SESSION['profile_picture'] ?? 'uploads/profile_pictures/default.jpg'; ?>" alt="Profile Picture" class="profile-picture">
+        <img src="<?php echo $_SESSION['profile_picture'] ?? 'uploads/profile_pictures/default.jpg'; ?>" alt="Profile Picture" class="profile-picture">
         <h3>Teacher's Panel</h3>
         <p>Teacher</p>
     </div>
@@ -143,55 +287,122 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
     <a href="logout.php" class="btn btn-danger mt-auto">Logout</a>
 </div>
 
+<div id="clock" class="clock">
+    <!-- Clock with Date will be displayed here -->
+</div>
+
 <!-- Main Content -->
 <div class="content">
-    <div id="dashboard" style="display:none;">
-        <h2>Dashboard</h2>
-        <p>Welcome to your dashboard.</p>
+    <div id="dashboard">
+        <div class="container my-4">
+            <h1 class="text-center mb-4">My Dashboard</h1>
+            <div class="row text-center">
+                <div class="col-md-4">
+                    <div class="dashboard-card">
+                        <img src="images/student.png" alt="Total Students" class="favicon">
+                        <h5>Total Students</h5>
+                        <!-- Displaying the number of students dynamically -->
+                        <p id="total-students"><?php echo $total_students; ?></p>
+                    </div>
+                </div>
+                <!-- Total Courses Card -->
+                <div class="col-md-4">
+                    <div class="dashboard-card">
+                        <img src="images/course.png" alt="Total Courses" class="favicon">
+                        <h5>Total Courses</h5>
+                        <!-- Displaying the number of courses dynamically -->
+                        <p id="total-courses"><?php echo $total_courses; ?></p>
+                    </div>
+                </div>
+                <!-- Total Assignments Card -->
+                <div class="col-md-4">
+                    <div class="dashboard-card">
+                        <img src="images/assignment.png" alt="Total Assignments" class="favicon">
+                        <h5>Number of Assignments</h5>
+                        <!-- Displaying the number of assignments -->
+                        <p id="total-assignments"><?php echo $total_assignments; ?></p>
+                    </div>
+                </div>
+            </div>
+            <div class="row text-center mt-4">
+                <!-- Total Modules Card -->
+                <div class="col-md-4">
+                    <div class="dashboard-card">
+                        <img src="images/modules.png" alt="Total Modules" class="favicon">
+                        <h5>Number of Modules</h5>
+                        <p id="total-modules"><?php echo $total_modules; ?></p>
+                    </div>
+                </div>
+                <!-- Total Quizzes Card -->
+                <div class="col-md-4">
+                    <div class="dashboard-card">
+                        <img src="images/quizzes.png" alt="Total Quizzes" class="favicon">
+                        <h5>Number of Quizzes</h5>
+                        <p id="total-quizzes"><?php echo $total_quizzes; ?></p>
+                    </div>
+                </div>
+                <!-- Total Scheduled Events Card -->
+                <div class="col-md-4">
+                    <div class="dashboard-card">
+                        <img src="images/schedule.png" alt="Total Scheduled Events" class="favicon">
+                        <h5>Pending Schedules</h5>
+                        <p id="total-events"><?php echo $total_events; ?></p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    
-    <div id="course-management" style="display:none;">
-        <h2>Course Management</h2>
-        <p>Manage your courses here.</p>
-    </div>
-    
-    <div id="student-management" style="display:none;">
-        <h2>Student Management</h2>
-        <p>Manage students here.</p>
-    </div>
 
-    <!-- Update Profile Section -->
-    <div id="update-profile" class="update-profile-form" style="display:none;">
-        <h2>Update Profile</h2>
-        <form>
-            <div class="form-group">
-                <label for="name">Full Name</label>
-                <input type="text" class="form-control" id="name" placeholder="Enter your full name">
-            </div>
+<!-- Search Bar and Student Table -->
+<div class="mt-4">
+    <!-- Search Form -->
+    <form method="GET" action="" class="form-inline mb-4">
+        <!-- Search by Name (Search Bar) -->
+        <div class="form-group">
+            <input type="text" class="form-control" name="search" value="<?php echo htmlspecialchars($search_term); ?>" placeholder="Search by student name" style="width: 300px;">
+        </div>
+        
+        <!-- Custom Search Button with Favicon -->
+        <button type="submit" class="btn btn-custom ml-2">
+            <!-- Image container for favicon -->
+            <span class="search-icon-container">
+                <img src="images/search.png" alt="Search Icon" class="search-icon">
+            </span>
+        </button>
+    </form>
 
-            <div class="form-group">
-                <label for="email">Email address</label>
-                <input type="email" class="form-control" id="email" placeholder="Enter your email">
-            </div>
-
-            <div class="form-group">
-                <label for="new-password">New Password</label>
-                <input type="password" class="form-control" id="new-password" placeholder="Enter a new password">
-            </div>
-
-            <div class="form-group">
-                <label for="confirm-password">Confirm Password</label>
-                <input type="password" class="form-control" id="confirm-password" placeholder="Confirm your new password">
-            </div>
-
-            <div class="form-group">
-                <label for="profile-picture">Profile Picture</label>
-                <input type="file" class="form-control-file" id="profile-picture">
-            </div>
-
-            <button type="submit" class="btn btn-primary">Update Profile</button>
-            <button type="button" class="cancel-btn mt-3" id="cancel-button">Cancel</button>
-        </form>
+    <!-- Students Table -->
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Student ID</th>
+                    <th>Gender</th>
+                    <th>Profile Picture</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                // Check if there are any results
+                if ($search_result->num_rows > 0) {
+                    // Loop through the results
+                    while ($row = $search_result->fetch_assoc()) {
+                        echo "<tr>";
+                        echo "<td><img src='" . $row['profile_picture'] . "' alt='Profile Picture' class='rounded-circle' width='50' height='50'></td>";
+                        echo "<td>" . $row['first_name'] . " " . $row['last_name'] . "</td>";
+                        echo "<td>" . $row['email'] . "</td>";
+                        echo "<td>" . $row['student_id'] . "</td>";
+                        echo "<td>" . ucfirst($row['gender']) . "</td>";
+                        echo "</tr>";
+                    }
+                } else {
+                    echo "<tr><td colspan='5' class='text-center'>No students found.</td></tr>";
+                }
+                ?>
+            </tbody>
+        </table>
     </div>
 </div>
 
@@ -201,18 +412,42 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 <script>
-    // JavaScript to show the relevant sections when navigation is clicked
-    document.querySelectorAll('.sidebar nav a').forEach(function(link) {
-        link.addEventListener('click', function() {
-            // Hide all content sections
-            document.querySelectorAll('.content > div').forEach(function(section) {
-                section.style.display = 'none';
-            });
-            // Show the section corresponding to the clicked link
-            const sectionId = link.getAttribute('href').substring(1);
-            document.getElementById(sectionId).style.display = 'block';
-        });
-    });
+
+    // Function to update the clock and date
+function updateClock() {
+    var now = new Date();
+    
+    // Get current time
+    var hours = now.getHours();
+    var minutes = now.getMinutes();
+    var seconds = now.getSeconds();
+    var ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // 12-hour format
+    minutes = minutes < 10 ? '0' + minutes : minutes;
+    seconds = seconds < 10 ? '0' + seconds : seconds;
+    
+    var timeString = hours + ':' + minutes + ':' + seconds + ' ' + ampm;
+    
+    // Get current date
+    var daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    var day = daysOfWeek[now.getDay()];
+    var date = now.getDate();
+    var month = months[now.getMonth()];
+    var year = now.getFullYear();
+    
+    var dateString = day + ', ' + month + ' ' + date + ', ' + year;
+
+    // Update the clock and date div
+    document.getElementById('clock').innerText = dateString + ' | ' + timeString;
+}
+
+// Update the clock every second
+setInterval(updateClock, 1000);
+
+// Initialize the clock on page load
+updateClock();
 
     // Cancel button to go back to the dashboard
     document.getElementById('cancel-button').addEventListener('click', function() {

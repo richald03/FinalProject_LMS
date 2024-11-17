@@ -19,81 +19,76 @@ $stmt->execute();
 $result = $stmt->get_result();
 $student = $result->fetch_assoc();
 
-// Fetch the grades for this student
-$grades_sql = "SELECT * FROM grades WHERE student_id = ? LIMIT 1";
-$grades_stmt = $conn->prepare($grades_sql);
-$grades_stmt->bind_param("i", $student_id);
-$grades_stmt->execute();
-$grades_result = $grades_stmt->get_result();
-$grades = $grades_result->fetch_assoc();
-
-// ** Check if grades are null or empty **
-if (!$grades) {
-    // If no grades are found, redirect back to the grading page or another page
-    header("Location: grading.php?status=nogrades");
-    exit();
-}
-
-// Fetch available courses from the database
-$courses_sql = "SELECT id, name FROM courses";
-$courses_result = $conn->query($courses_sql);
+// Fetch only courses with grades for this student
+$courses_sql = "SELECT c.id, c.name 
+                FROM courses c 
+                INNER JOIN grades g ON c.id = g.course_id 
+                WHERE g.student_id = ?";
+$courses_stmt = $conn->prepare($courses_sql);
+$courses_stmt->bind_param("i", $student_id);
+$courses_stmt->execute();
+$courses_result = $courses_stmt->get_result();
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $course_id = $_POST['course'];
+    if (isset($_POST['fetch_grades']) && isset($_POST['course_id'])) {
+        $course_id = floatval($_POST['course_id']);
+        $sql = "SELECT prelim, midterm, final FROM grades WHERE course_id = ? AND student_id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ii", $course_id, $student_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            echo json_encode($result->fetch_assoc());
+        } else {
+            echo json_encode([]);
+        }
+        exit(); // Stop further processing for AJAX
+    }
+
+    // Form submission logic for saving grades for specific course
+    $course_id = floatval($_POST['course']);
     $prelim = floatval($_POST['prelim']);
     $midterm = floatval($_POST['midterm']);
     $final = floatval($_POST['final']);
 
-    // If final grade is below 50, automatically fail
-    if ($final < 50) {
-        $average = 0;
-        $grade_equivalent = '5.00';
-        $descriptive_reading = 'Failed';
-    } else {
-        // Adjusted average calculation with the new weights
-        $average_midterm = ($prelim * 0.15) + $midterm;
-        $average = ($average_midterm * 0.25) + ($final * 0.60);
+    // New grade calculation logic: (Prelim + Midterm + Final) / 3
+    $average = ($prelim + $midterm + $final) / 3;
 
-        // Determine the grade equivalent based on the computed average
+    // Determine grade equivalent based on the average
+    if ($final < 50) {
+        $grade_equivalent = '5.00';
+    } else {
         if ($average >= 94) {
             $grade_equivalent = '1.00';
-            $descriptive_reading = 'Excellent';
         } elseif ($average >= 88.5) {
             $grade_equivalent = '1.25';
-            $descriptive_reading = 'Superior';
         } elseif ($average >= 83) {
             $grade_equivalent = '1.50';
-            $descriptive_reading = 'Meritorious';
         } elseif ($average >= 77.5) {
             $grade_equivalent = '1.75';
-            $descriptive_reading = 'Very Good';
         } elseif ($average >= 72) {
             $grade_equivalent = '2.00';
-            $descriptive_reading = 'Good';
         } elseif ($average >= 66.5) {
             $grade_equivalent = '2.25';
-            $descriptive_reading = 'Very Satisfactory';
         } elseif ($average >= 61) {
             $grade_equivalent = '2.50';
-            $descriptive_reading = 'Satisfactory';
         } elseif ($average >= 55.5) {
             $grade_equivalent = '2.75';
-            $descriptive_reading = 'Fair';
         } elseif ($average >= 50) {
             $grade_equivalent = '3.00';
-            $descriptive_reading = 'Passing';
         } else {
             $grade_equivalent = '5.00';
-            $descriptive_reading = 'Failed';
         }
     }
 
-    // Update grades in the database
-    $update_sql = "UPDATE grades SET course_id = ?, prelim = ?, midterm = ?, final = ?, average = ?, grade_equivalent = ?, descriptive_reading = ? 
-                WHERE student_id = ?";
+    // Update grades in the database for the specific course and student
+    $update_sql = "UPDATE grades 
+                SET prelim = ?, midterm = ?, final = ?, average = ?, grade_equivalent = ? 
+                WHERE student_id = ? AND course_id = ?";
     $update_stmt = $conn->prepare($update_sql);
-    $update_stmt->bind_param("iidssssi", $course_id, $prelim, $midterm, $final, $average, $grade_equivalent, $descriptive_reading, $student_id);
+    $update_stmt->bind_param("ddddsii", $prelim, $midterm, $final, $average, $grade_equivalent, $student_id, $course_id);
     $update_stmt->execute();
 
     // Redirect to grading page
@@ -109,6 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Grades</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         body {
             background-color: #f8f9fa;
@@ -138,6 +134,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .form-control:focus {
             border-color: #007bff;
         }
+        .btn-primary {
+            border-radius: 8px;
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        .btn-secondary {
+            border-radius: 8px;
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #5a6268;
+        }
+        .mb-4 {
+            margin-bottom: 1.5rem;
+        }
+        .form-control {
+            margin-bottom: 20px;
+        }
+        select.form-select {
+            border-radius: 8px;
+            background-color: #f1f1f1;
+            border-color: #ced4da;
+        }
+        select.form-select:focus {
+            border-color: #007bff;
+            background-color: #ffffff;
+        }
         .remarks {
             font-size: 18px;
             font-weight: bold;
@@ -149,27 +178,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .remarks.failed {
             color: red;
         }
-        .btn-primary, .btn-secondary {
-            border-radius: 8px;
-        }
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-        }
-        .btn-primary:hover {
-            background-color: #0056b3;
-            border-color: #0056b3;
-        }
-        .btn-secondary {
-            background-color: #6c757d;
-            border-color: #6c757d;
-        }
-        .btn-secondary:hover {
-            background-color: #5a6268;
-            border-color: #5a6268;
-        }
-        .form-control {
-            margin-bottom: 20px;
+        @media (max-width: 576px) {
+            .container {
+                margin-top: 20px;
+            }
         }
     </style>
 </head>
@@ -180,13 +192,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <div class="form-section">
         <form method="POST" id="gradesForm">
-            <!-- Select Course -->
+            <!-- Course Selection -->
             <div class="mb-4">
                 <label for="course" class="form-label">Course</label>
                 <select id="course" name="course" class="form-select" required>
                     <option value="">Select a course</option>
                     <?php while ($course = $courses_result->fetch_assoc()): ?>
-                        <option value="<?php echo $course['id']; ?>" <?php echo $grades['course_id'] == $course['id'] ? 'selected' : ''; ?>><?php echo htmlspecialchars($course['name']); ?></option>
+                        <option value="<?php echo $course['id']; ?>">
+                            <?php echo htmlspecialchars($course['name']); ?>
+                        </option>
                     <?php endwhile; ?>
                 </select>
             </div>
@@ -194,27 +208,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <!-- Prelim Grade -->
             <div class="mb-4">
                 <label for="prelim" class="form-label">Prelim Grade</label>
-                <input type="number" step="0.01" min="0" max="100" id="prelim" name="prelim" class="form-control" value="<?php echo $grades['prelim']; ?>" oninput="calculateEquivalent()" required>
+                <input type="number" step="0.01" min="0" max="100" id="prelim" name="prelim" class="form-control" value="" required>
             </div>
 
             <!-- Midterm Grade -->
             <div class="mb-4">
                 <label for="midterm" class="form-label">Midterm Grade</label>
-                <input type="number" step="0.01" min="0" max="100" id="midterm" name="midterm" class="form-control" value="<?php echo $grades['midterm']; ?>" oninput="calculateEquivalent()" required>
+                <input type="number" step="0.01" min="0" max="100" id="midterm" name="midterm" class="form-control" value="" required>
             </div>
 
             <!-- Final Grade -->
             <div class="mb-4">
                 <label for="final" class="form-label">Final Grade</label>
-                <input type="number" step="0.01" min="0" max="100" id="final" name="final" class="form-control" value="<?php echo $grades['final']; ?>" oninput="calculateEquivalent()" required>
+                <input type="number" step="0.01" min="0" max="100" id="final" name="final" class="form-control" value="" required>
             </div>
 
-            <!-- Grade Equivalent and Descriptive Reading -->
-            <div class="remarks" id="remarks">
-                Grade Equivalent: <?php echo $grades['grade_equivalent']; ?> - <?php echo $grades['descriptive_reading']; ?>
-            </div>
+            <!-- Remarks -->
+            <div id="remarks"></div>
 
-            <!-- Submit Button -->
+            <!-- Submit and Back buttons -->
             <div class="d-flex justify-content-between">
                 <button type="submit" class="btn btn-primary">Save Changes</button>
                 <a href="grading.php" class="btn btn-secondary">Back</a>
@@ -224,63 +236,90 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <script>
-function calculateEquivalent() {
-    const prelim = parseFloat(document.getElementById('prelim').value) || 0;
-    const midterm = parseFloat(document.getElementById('midterm').value) || 0;
-    const final = parseFloat(document.getElementById('final').value) || 0;
+$(document).ready(function () {
+    $('#course').change(function () {
+        const courseId = $(this).val();
+        if (courseId) {
+            $.ajax({
+                url: 'grading.php',
+                type: 'POST',
+                data: {
+                    fetch_grades: true,
+                    course_id: courseId
+                },
+                success: function (data) {
+                    const grades = JSON.parse(data);
+                    if (grades) {
+                        $('#prelim').val(grades.prelim);
+                        $('#midterm').val(grades.midterm);
+                        $('#final').val(grades.final);
+                    } else {
+                        $('#prelim').val('');
+                        $('#midterm').val('');
+                        $('#final').val('');
+                    }
+                }
+            });
+        }
+    });
 
-    const remarksElement = document.getElementById('remarks');
+    // Grade calculation on input change
+    $('#prelim, #midterm, #final').on('input', function () {
+        calculateEquivalent();
+    });
 
-    // Automatically fail if final grade is below 50
-    if (final < 50) {
-        remarksElement.textContent = `Grade Equivalent: 5.00 - Failed`;
-        remarksElement.className = 'remarks failed';  // Apply the 'failed' class for red color
-        return;
+    function calculateEquivalent() {
+        const prelim = parseFloat($('#prelim').val()) || 0;
+        const midterm = parseFloat($('#midterm').val()) || 0;
+        const final = parseFloat($('#final').val()) || 0;
+
+        // Calculate the average
+        const average = (prelim + midterm + final) / 3;
+
+        let gradeEquivalent = '';
+        let remarksClass = '';  // Variable for determining red or green style
+
+        if (final < 50) {
+            gradeEquivalent = '5.00';
+            remarksClass = 'failed';  // Red for failed
+            $('#remarks').html(`<span class="remarks ${remarksClass}">Final grade is below 50. Student failed.</span>`);
+        } else {
+            if (average >= 94) {
+                gradeEquivalent = '1.00';
+                remarksClass = 'passed';  // Green for passed
+            } else if (average >= 88.5) {
+                gradeEquivalent = '1.25';
+                remarksClass = 'passed';
+            } else if (average >= 83) {
+                gradeEquivalent = '1.50';
+                remarksClass = 'passed';
+            } else if (average >= 77.5) {
+                gradeEquivalent = '1.75';
+                remarksClass = 'passed';
+            } else if (average >= 72) {
+                gradeEquivalent = '2.00';
+                remarksClass = 'passed';
+            } else if (average >= 66.5) {
+                gradeEquivalent = '2.25';
+                remarksClass = 'passed';
+            } else if (average >= 61) {
+                gradeEquivalent = '2.50';
+                remarksClass = 'passed';
+            } else if (average >= 55.5) {
+                gradeEquivalent = '2.75';
+                remarksClass = 'passed';
+            } else if (average >= 50) {
+                gradeEquivalent = '3.00';
+                remarksClass = 'passed';
+            } else {
+                gradeEquivalent = '5.00';
+                remarksClass = 'failed';
+            }
+
+            $('#remarks').html(`<span class="remarks ${remarksClass}">Grade Equivalent: ${gradeEquivalent}</span>`);
+        }
     }
-
-    // Adjusted average calculation with the new weights
-    const average_midterm = (prelim * 0.15) + midterm;
-    const average = (average_midterm * 0.25) + (final * 0.60);
-
-    let grade_equivalent = '';
-    let descriptive_reading = '';
-
-    if (average >= 94) {
-        grade_equivalent = '1.00';
-        descriptive_reading = 'Excellent';
-    } else if (average >= 88.5) {
-        grade_equivalent = '1.25';
-        descriptive_reading = 'Superior';
-    } else if (average >= 83) {
-        grade_equivalent = '1.50';
-        descriptive_reading = 'Meritorious';
-    } else if (average >= 77.5) {
-        grade_equivalent = '1.75';
-        descriptive_reading = 'Very Good';
-    } else if (average >= 72) {
-        grade_equivalent = '2.00';
-        descriptive_reading = 'Good';
-    } else if (average >= 66.5) {
-        grade_equivalent = '2.25';
-        descriptive_reading = 'Very Satisfactory';
-    } else if (average >= 61) {
-        grade_equivalent = '2.50';
-        descriptive_reading = 'Satisfactory';
-    } else if (average >= 55.5) {
-        grade_equivalent = '2.75';
-        descriptive_reading = 'Fair';
-    } else if (average >= 50) {
-        grade_equivalent = '3.00';
-        descriptive_reading = 'Passing';
-    } else {
-        grade_equivalent = '5.00';
-        descriptive_reading = 'Failed';
-    }
-
-    remarksElement.textContent = `Grade Equivalent: ${grade_equivalent} - ${descriptive_reading}`;
-    // Apply passed or failed class based on the average grade
-    remarksElement.className = 'remarks ' + (average >= 50 ? 'passed' : 'failed');
-}
+});
 </script>
 
 </body>
