@@ -376,11 +376,11 @@ $conn->close();
         <table class="table table-bordered table-striped table-hover">
             <thead class="thead-dark">
                 <tr>
+                    <th>Profile Picture</th>
                     <th>Name</th>
                     <th>Email</th>
                     <th>Student ID</th>
                     <th>Gender</th>
-                    <th>Profile Picture</th>
                 </tr>
             </thead>
             <tbody>
