@@ -194,50 +194,44 @@ $stmt->close();
             background-color: #0056b3;
         }
 
-        /* Make Sidebar Responsive */
+        /* Small Screens (Sidebar at the top) */
         @media (max-width: 768px) {
             .sidebar {
+                position: relative;
                 width: 100%;
                 height: auto;
-                position: relative;
-                padding: 15px;
+                padding: 10px;
             }
 
-            .sidebar .logo-section img {
-                width: 60px;
-                height: 60px;
+            .content {
+                margin-left: 0;
+            }
+
+            .top-right-button {
+                position: relative;
+                top: 0;
+                right: 0;
             }
 
             .sidebar nav a {
                 padding: 8px;
                 font-size: 14px;
             }
-
-            .sidebar .profile-picture {
-                width: 60px;
-                height: 60px;
-            }
         }
-
+        /* Modal responsiveness */
         @media (max-width: 576px) {
-            .sidebar {
-                width: 100%;
+            .modal-dialog {
+                max-width: 100%;
+                margin: 15px;
+            }
+
+            .modal-body {
                 padding: 10px;
             }
 
-            .sidebar nav a {
-                padding: 6px;
-                font-size: 12px;
-            }
-
-            .sidebar .logo-section img {
-                width: 50px;
-                height: 50px;
-            }
-
-            .sidebar .profile-picture {
-                width: 50px;
-                height: 50px;
+            .form-control {
+                font-size: 14px;
+                padding: 8px;
             }
         }
     </style>

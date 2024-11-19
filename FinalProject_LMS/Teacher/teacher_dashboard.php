@@ -241,6 +241,47 @@ $conn->close();
         font-weight: bold;
         }
 
+        /* Small Screens (Sidebar at the top) */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 10px;
+            }
+
+            .content {
+                margin-left: 0;
+            }
+
+            .top-right-button {
+                position: relative;
+                top: 0;
+                right: 0;
+            }
+
+            .sidebar nav a {
+                padding: 8px;
+                font-size: 14px;
+            }
+        }
+        /* Modal responsiveness */
+        @media (max-width: 576px) {
+            .modal-dialog {
+                max-width: 100%;
+                margin: 15px;
+            }
+
+            .modal-body {
+                padding: 10px;
+            }
+
+            .form-control {
+                font-size: 14px;
+                padding: 8px;
+            }
+        }
+
 
     </style>
 </head>
@@ -285,10 +326,6 @@ $conn->close();
 
     <!-- Logout Link -->
     <a href="logout.php" class="btn btn-danger mt-auto">Logout</a>
-</div>
-
-<div id="clock" class="clock">
-    <!-- Clock with Date will be displayed here -->
 </div>
 
 <!-- Main Content -->
@@ -410,51 +447,6 @@ $conn->close();
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-<script>
-
-    // Function to update the clock and date
-function updateClock() {
-    var now = new Date();
-    
-    // Get current time
-    var hours = now.getHours();
-    var minutes = now.getMinutes();
-    var seconds = now.getSeconds();
-    var ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12;
-    hours = hours ? hours : 12; // 12-hour format
-    minutes = minutes < 10 ? '0' + minutes : minutes;
-    seconds = seconds < 10 ? '0' + seconds : seconds;
-    
-    var timeString = hours + ':' + minutes + ':' + seconds + ' ' + ampm;
-    
-    // Get current date
-    var daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    var day = daysOfWeek[now.getDay()];
-    var date = now.getDate();
-    var month = months[now.getMonth()];
-    var year = now.getFullYear();
-    
-    var dateString = day + ', ' + month + ' ' + date + ', ' + year;
-
-    // Update the clock and date div
-    document.getElementById('clock').innerText = dateString + ' | ' + timeString;
-}
-
-// Update the clock every second
-setInterval(updateClock, 1000);
-
-// Initialize the clock on page load
-updateClock();
-
-    // Cancel button to go back to the dashboard
-    document.getElementById('cancel-button').addEventListener('click', function() {
-        document.getElementById('update-profile').style.display = 'none';
-        document.getElementById('dashboard').style.display = 'block';
-    });
-</script>
 
 </body>
 </html>

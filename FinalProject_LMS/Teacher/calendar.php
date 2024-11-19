@@ -224,6 +224,31 @@ $conn->close();
                 height: 50px;
             }
         }
+
+        /* Small Screens (Sidebar at the top) */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 10px;
+            }
+
+            .content {
+                margin-left: 0;
+            }
+
+            .top-right-button {
+                position: relative;
+                top: 0;
+                right: 0;
+            }
+
+            .sidebar nav a {
+                padding: 8px;
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 <body>
