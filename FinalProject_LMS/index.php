@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($user['user_type'] === 'admin') {
                 header('Location: admin_dashboard.php');
             } elseif ($user['user_type'] === 'teacher') {
-                header('Location: teacher_dashboard.php');
+                header('Location: ../FinalProject_LMS/Teacher/teacher_dashboard.php');
             } elseif ($user['user_type'] === 'student') {
                 header('Location: student_dashboard.php');
             }
