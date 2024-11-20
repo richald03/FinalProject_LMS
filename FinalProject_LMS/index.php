@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } elseif ($user['user_type'] === 'teacher') {
                 header('Location: ../FinalProject_LMS/Teacher/teacher_dashboard.php');
             } elseif ($user['user_type'] === 'student') {
-                header('Location: student_dashboard.php');
+                header('Location: ../FinalProject_LMS/Student/student_dashboard.php');
             }
             exit();
         } else {

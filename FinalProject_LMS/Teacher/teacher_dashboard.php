@@ -228,19 +228,6 @@ $conn->close();
                 object-fit: contain; 
         }
 
-        /* Real-Time Clock */
-        .clock {
-        position: fixed;
-        top: 10px;
-        right: 20px;
-        background-color: #333;
-        color: #fff;
-        padding: 5px 15px;
-        border-radius: 5px;
-        font-size: 18px;
-        font-weight: bold;
-        }
-
         /* Small Screens (Sidebar at the top) */
         @media (max-width: 768px) {
             .sidebar {
@@ -281,8 +268,6 @@ $conn->close();
                 padding: 8px;
             }
         }
-
-
     </style>
 </head>
 <body>
