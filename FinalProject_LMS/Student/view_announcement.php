@@ -358,7 +358,7 @@ $conn->close();
     </div>
 
     <div class="text-center mb-4">
-        <img src="uploads/profile_pictures/default.jpg" alt="Profile Picture" class="profile-picture">
+    <img src="<?php echo $_SESSION['profile_picture'] ?? 'uploads/profile_pictures/default.jpg'; ?>" alt="Profile Picture" class="profile-picture">
         <h3>Student's Panel</h3>
         <p>Student</p>
     </div>
@@ -367,9 +367,8 @@ $conn->close();
     <nav>
         <a href="student_dashboard.php" class="nav-link">Dashboard</a>
         <a href="view_courses.php" class="nav-link">Courses</a>
-        <a href="view_assignments.php" class="nav-link">Assignments</a>
         <a href="view_grades.php" class="nav-link">Grades</a>
-        <a href="view_announcement.php" class="nav-link">Announcement</a>
+        <a href="view_announcement.php" class="nav-link">Announcements</a>
         <a href="update_profile.php" class="nav-link">Update Profile</a>
     </nav>
 

@@ -345,9 +345,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <nav>
         <a href="student_dashboard.php" class="nav-link">Dashboard</a>
         <a href="view_courses.php" class="nav-link">Courses</a>
-        <a href="view_assignments.php" class="nav-link"> Assignments</a>
         <a href="view_grades.php" class="nav-link"> Grades</a>
-        <a href="view_announcement.php" class="nav-link">Announcement</a>
+        <a href="view_announcement.php" class="nav-link">Announcements</a>
         <a href="update_profile.php" class="nav-link">Update Profile</a>
     </nav>
 
