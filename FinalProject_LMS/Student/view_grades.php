@@ -2,12 +2,30 @@
 session_start();
 include 'db.php';
 
-// Redirect if not logged in as a student
+// Ensure the user is logged in as a student
 if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'student') {
     header("Location: ../index.php");
     exit();
 }
 
+// Get the student ID from session
+$student_id = $_SESSION['user_id'];
+
+// Query to fetch grades for the logged-in student
+$sql_grades = "SELECT g.prelim, g.midterm, g.final, g.average, g.grade_equivalent, c.name AS course_name
+            FROM grades g
+            JOIN courses c ON g.course_id = c.id
+            WHERE g.student_id = ?";
+
+$stmt = $conn->prepare($sql_grades);
+$stmt->bind_param("i", $student_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+// Close the statement
+$stmt->close();
+
+// Close the connection
 $conn->close();
 ?>
 
@@ -16,7 +34,7 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Dashboard</title>
+    <title>View Grades</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         /* Sidebar Styling */
@@ -87,8 +105,32 @@ $conn->close();
 
         /* Smaller Screens (for mobile devices) */
         @media (max-width: 768px) {
+            .content {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 10px;;
+            }
+
+            .sidebar nav a {
+                padding: 8px;
+                font-size: 14px;
+            }
+
+            /* Profile Picture Scaling */
+            .sidebar .profile-picture {
+                width: 50px;
+                height: 50px;
+            }
+        }
+
+        /* Small Screens (Sidebar at the top) */
+        @media (max-width: 768px) {
             .sidebar {
-                display: none; /* Hide sidebar */
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 10px;
             }
 
             .content {
@@ -105,34 +147,65 @@ $conn->close();
                 padding: 8px;
                 font-size: 14px;
             }
-
-            /* Profile Picture Scaling */
-            .sidebar .profile-picture {
-                width: 50px;
-                height: 50px;
+        }
+        /* Modal responsiveness */
+        @media (max-width: 576px) {
+            .modal-dialog {
+                max-width: 100%;
+                margin: 15px;
             }
-        }
 
-        /* Mobile Navigation - Show Sidebar when toggled */
-        .sidebar-toggler {
-            display: none;
-        }
-
-        @media (max-width: 768px) {
-            .sidebar-toggler {
-                display: block;
-                position: absolute;
-                top: 20px;
-                left: 20px;
-                font-size: 24px;
-                color: #fff;
-                background: #007bff;
-                border: none;
+            .modal-body {
                 padding: 10px;
-                cursor: pointer;
+            }
+
+            .form-control {
+                font-size: 14px;
+                padding: 8px;
             }
         }
+        /* Grades Table Styling */
+        .grades-table {
+            margin-top: 30px;
+            width: 100%;
+            border-collapse: collapse;
+        }
 
+        .grades-table th, .grades-table td {
+            text-align: center;
+            vertical-align: middle;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+        }
+
+        .grades-table th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .grades-table td {
+            background-color: #f9f9f9;
+        }
+
+        .grades-table tr:nth-child(even) td {
+            background-color: #f2f2f2;
+        }
+
+        .grades-table tr:hover td {
+            background-color: #f1f1f1;
+        }
+
+        /* Add responsiveness to the table */
+        @media (max-width: 768px) {
+            .grades-table th, .grades-table td {
+                padding: 8px 10px;
+                font-size: 14px;
+            }
+
+            .grades-table {
+                font-size: 12px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -144,7 +217,7 @@ $conn->close();
     </div>
 
     <div class="text-center mb-4">
-        <img src="uploads/profile_pictures/default.jpg" alt="Profile Picture" class="profile-picture">
+    <img src="<?php echo $_SESSION['profile_picture'] ?? 'uploads/profile_pictures/default.jpg'; ?>" alt="Profile Picture" class="profile-picture">
         <h3>Student's Panel</h3>
         <p>Student</p>
     </div>
@@ -162,13 +235,48 @@ $conn->close();
     <a href="logout.php" class="btn btn-danger mt-auto">Logout</a>
 </div>
 
-<!-- Content Section -->
+<!-- Main Content -->
 <div class="content">
-    <!-- Your content goes here -->
+    <div class="container">
+        <h1 class="text-center my-4">My Grades</h1>
+
+        <!-- Table displaying the grades -->
+        <table class="table grades-table">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Course</th>
+                    <th>Prelim</th>
+                    <th>Midterm</th>
+                    <th>Final</th>
+                    <th>Average</th>
+                    <th>Grade Equivalent</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if ($result->num_rows > 0): ?>
+                    <?php while ($row = $result->fetch_assoc()): ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($row['course_name']); ?></td>
+                            <td><?php echo htmlspecialchars($row['prelim']); ?></td>
+                            <td><?php echo htmlspecialchars($row['midterm']); ?></td>
+                            <td><?php echo htmlspecialchars($row['final']); ?></td>
+                            <td><?php echo htmlspecialchars($row['average']); ?></td>
+                            <td><?php echo htmlspecialchars($row['grade_equivalent']); ?></td>
+                        </tr>
+                    <?php endwhile; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="6" class="text-center">No grades available</td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <!-- Bootstrap JS and jQuery -->
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 </body>

@@ -2,6 +2,12 @@
 session_start();
 include 'db.php';
 
+// Redirect if not logged in as a student
+if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'student') {
+    header("Location: ../index.php");
+    exit();
+}
+
 // Fetch all courses from the database
 $sql = "SELECT * FROM courses";
 $courses = [];
@@ -140,30 +146,46 @@ function getRandomColor()
         background-color: #333;
     }
 
-    /* Responsive Design */
-    @media (min-width: 768px) {
-        .sidebar {
-            position: fixed;
-            height: 100vh;
-        }
+   /* Small Screens (Sidebar at the top) */
+   @media (max-width: 768px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                padding: 10px;
+            }
 
-        .content {
-            margin-left: 250px;
-        }
-    }
+            .content {
+                margin-left: 0;
+            }
 
-    @media (max-width: 768px) {
-        .sidebar {
-            position: relative;
-            width: 100%;
-            height: auto;
-            padding: 10px;
-        }
+            .top-right-button {
+                position: relative;
+                top: 0;
+                right: 0;
+            }
 
-        .content {
-            margin-left: 0;
+            .sidebar nav a {
+                padding: 8px;
+                font-size: 14px;
+            }
         }
-    }
+        /* Modal responsiveness */
+        @media (max-width: 576px) {
+            .modal-dialog {
+                max-width: 100%;
+                margin: 15px;
+            }
+
+            .modal-body {
+                padding: 10px;
+            }
+
+            .form-control {
+                font-size: 14px;
+                padding: 8px;
+            }
+        }
 </style>
 </head>
 <body>
@@ -185,7 +207,7 @@ function getRandomColor()
         <a href="student_dashboard.php" class="nav-link">Dashboard</a>
         <a href="view_courses.php" class="nav-link">Courses</a>
         <a href="view_grades.php" class="nav-link">Grades</a>
-        <a href="view_announcements.php" class="nav-link">Announcements</a>
+        <a href="view_announcement.php" class="nav-link">Announcements</a>
         <a href="update_profile.php" class="nav-link">Update Profile</a>
     </nav>
 
@@ -228,6 +250,6 @@ function getRandomColor()
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.4.4/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 </body>
-
 </html>

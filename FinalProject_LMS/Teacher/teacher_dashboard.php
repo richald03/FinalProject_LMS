@@ -62,7 +62,7 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TipTopLearn - Teacher's Panel</title>
+    <title>Teacher Dashboard</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         /* Custom Styles for Sidebar */
@@ -268,6 +268,22 @@ $conn->close();
                 padding: 8px;
             }
         }
+
+        .table img {
+            width: 100%;
+            max-width: 120px;
+            height: auto;
+        }
+        .table th, .table td {
+            text-align: center;
+            vertical-align: middle;
+        }
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -381,7 +397,7 @@ $conn->close();
     <form method="GET" action="" class="form-inline mb-4">
         <!-- Search by Name (Search Bar) -->
         <div class="form-group">
-            <input type="text" class="form-control" name="search" value="<?php echo htmlspecialchars($search_term); ?>" placeholder="Search by student name" style="width: 300px;">
+            <input type="text" class="form-control" name="search" value="<?php echo htmlspecialchars($search_term); ?>" placeholder="Search student's name" style="width: 300px;">
         </div>
         
         <!-- Custom Search Button with Favicon -->

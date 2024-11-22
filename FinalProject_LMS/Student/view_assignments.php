@@ -1,6 +1,12 @@
 <?php
 session_start();
-include 'db.php'; // Make sure the database connection is included
+include 'db.php'; 
+
+// Redirect if not logged in as a student
+if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'student') {
+    header("Location: ../index.php");
+    exit();
+}
 
 // Fetch all assignments from the database
 $sql_assignments = "SELECT * FROM assignments ORDER BY due_date ASC"; // No `course_id` filtering needed
