@@ -5,7 +5,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'];
     $password = $_POST['password'];
 
-    // Check user credentials
+    // Prepare and execute the query to fetch user data
     $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
@@ -13,14 +13,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if ($result->num_rows > 0) {
         $user = $result->fetch_assoc();
+
+        // Verify the password
         if (password_verify($password, $user['password'])) {
             session_start();
+
+            // Store user details in session
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_type'] = $user['user_type'];
+            $_SESSION['profile_picture'] = $user['profile_picture'] ?? 'uploads/default.jpg'; 
 
-            // Redirect based on the user role
+            // Redirect based on user role
             if ($user['user_type'] === 'admin') {
-                header('Location: admin_dashboard.php');
+                header('Location: ../FinalProject_LMS/Admin/admin_dashboard.php');
             } elseif ($user['user_type'] === 'teacher') {
                 header('Location: ../FinalProject_LMS/Teacher/teacher_dashboard.php');
             } elseif ($user['user_type'] === 'student') {
@@ -33,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $error = "No user found with this email!";
     }
-    
+
     $stmt->close();
     $conn->close();
 }

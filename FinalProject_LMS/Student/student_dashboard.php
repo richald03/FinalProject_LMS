@@ -38,6 +38,18 @@ if (isset($_GET['search'])) {
 }
 $search_result = $conn->query($search_sql);
 
+
+// Fetch the default profile picture from the database or use a static fallback
+$query = "SELECT profile_picture FROM users WHERE user_type = 'default'";
+$result = $conn->query($query);
+
+if ($result && $result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $profile_picture = $row['profile_picture'];
+} else {
+    $profile_picture = 'uploads/profile_pictures/default.jpg';
+}
+
 // Close the connection
 $conn->close();
 ?>
