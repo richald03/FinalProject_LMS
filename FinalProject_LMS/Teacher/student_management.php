@@ -1,5 +1,5 @@
 <?php
-include 'db.php';
+include '../db.php';
 session_start();
 
 // Check if the user is logged in and is a teacher
@@ -18,7 +18,7 @@ $result = $conn->query($sql);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Management - LMS</title>
+    <title>Student Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {

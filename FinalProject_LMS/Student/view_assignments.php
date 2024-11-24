@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'db.php'; 
+include '../db.php';
 
 // Redirect if not logged in as a student
 if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'student') {
@@ -75,6 +75,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 }
+
+// Fetch the logged-in user's details
+$user_id = $_SESSION['user_id'];
+$sql_user = "SELECT first_name, last_name FROM users WHERE id = ?";
+$stmt = $conn->prepare($sql_user);
+$stmt->bind_param('i', $user_id);
+$stmt->execute();
+$result_user = $stmt->get_result();
+
+if ($result_user && $result_user->num_rows > 0) {
+    $user_data = $result_user->fetch_assoc();
+    $first_name = $user_data['first_name'];
+    $last_name = $user_data['last_name'];
+} else {
+    $first_name = 'Student'; // Default fallback
+    $last_name = '';         // Default fallback
+}
 ?>
 
 <!DOCTYPE html>
@@ -83,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Assignments - To Do List</title>
+    <title>Assignments</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .assignment-card {
@@ -160,7 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </a>
 
 <div class="container mt-4">
-    <h2 class="text-center mb-4">Assignments - To Do</h2>
+    <h2 class="text-center mb-4">Assignments</h2>
 
     <!-- Display Success or Error Messages only for file upload -->
     <?php if ($error_message && isset($_FILES['assignment_file'])): ?>

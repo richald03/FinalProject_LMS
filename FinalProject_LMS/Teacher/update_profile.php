@@ -1,13 +1,30 @@
 <?php
 session_start();
-
-require 'db.php'; 
+include '../db.php';
 
 // Ensure the user is logged in and is a teacher
 if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
     header("Location: index.php");
     exit();
 }
+
+// Fetch the logged-in user's details
+$user_id = $_SESSION['user_id'];
+$sql_user = "SELECT first_name, last_name FROM users WHERE id = ?";
+$stmt = $conn->prepare($sql_user);
+$stmt->bind_param('i', $user_id);
+$stmt->execute();
+$result_user = $stmt->get_result();
+
+if ($result_user && $result_user->num_rows > 0) {
+    $user_data = $result_user->fetch_assoc();
+    $first_name = $user_data['first_name'];
+    $last_name = $user_data['last_name'];
+} else {
+    $first_name = 'Student'; 
+    $last_name = '';         
+}
+
 // Get the teacher's current user ID
 $user_id = $_SESSION['user_id'];
 
@@ -128,7 +145,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TipTopLearn - Update Profile</title>
+    <title>Update Profile</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
     /* Custom Styles for Sidebar */
@@ -326,20 +343,78 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 padding: 8px;
             }
         }
+
+        /* Sidebar transition for hide/show effect */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    width: 250px;
+    height: 100vh;
+    background-color: #66a3ff;
+    overflow-y: auto;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+}
+
+.sidebar.show {
+    transform: translateX(0);
+}
+
+/* Content shift when sidebar is visible */
+.content {
+    margin-left: 0;
+    transition: margin-left 0.3s ease-in-out;
+}
+
+.sidebar.show ~ .content {
+    margin-left: 250px;
+}
+
+/* Navbar button styles */
+.burger-btn {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1100;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+@media (min-width: 992px) {
+    .burger-btn {
+        display: none; 
+    }
+
+    .sidebar {
+        transform: translateX(0); 
+    }
+
+    .content {
+        margin-left: 250px; 
+    }
+}
 </style>
 </head>
 <body>
 
+<!-- Burger Button for Sidebar -->
+<button class="burger-btn" id="burgerToggle">☰</button>
+
 <!-- Sidebar -->
-<div class="sidebar d-flex flex-column">
+<div class="sidebar d-flex flex-column" id="sidebar">
     <div class="logo-section text-center mb-4">
         <img src="../images/logo.png" alt="Logo">
     </div>
 
     <div class="text-center mb-4">
     <img src="<?php echo $_SESSION['profile_picture'] ?? 'uploads/profile_pictures/default.jpg'; ?>" alt="Profile Picture" class="profile-picture">
-        <h3>Teacher's Panel</h3>
-        <p>Teacher</p>
+    <h6><?php echo htmlspecialchars($first_name . ' ' . $last_name); ?></h6>
     </div>
 
     <!-- Navigation Links inside Sidebar -->
@@ -452,6 +527,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Cancel button to go back to the dashboard
     document.getElementById('cancel-button').addEventListener('click', function() {
         window.location.href = 'teacher_dashboard.php';  // Go back to the dashboard page
+    });
+
+    document.getElementById('burgerToggle').addEventListener('click', function () {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('show'); // Toggle 'show' class
     });
 </script>
 

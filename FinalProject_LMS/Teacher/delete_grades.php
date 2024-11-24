@@ -1,5 +1,5 @@
 <?php
-include 'db.php';
+include '../db.php';
 session_start();
 
 // Check if the user is logged in and is a teacher

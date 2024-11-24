@@ -1,12 +1,30 @@
 <?php
 session_start();
-include 'db.php';  // Make sure you have the correct database connection
+include '../db.php';
 
 // Ensure the teacher is logged in
 if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
     header("Location: index.php");
     exit();
 }
+
+// Fetch the logged-in user's details
+$user_id = $_SESSION['user_id'];
+$sql_user = "SELECT first_name, last_name FROM users WHERE id = ?";
+$stmt = $conn->prepare($sql_user);
+$stmt->bind_param('i', $user_id);
+$stmt->execute();
+$result_user = $stmt->get_result();
+
+if ($result_user && $result_user->num_rows > 0) {
+    $user_data = $result_user->fetch_assoc();
+    $first_name = $user_data['first_name'];
+    $last_name = $user_data['last_name'];
+} else {
+    $first_name = 'Student'; 
+    $last_name = '';         
+}
+
 
 // Get the logged-in teacher's ID
 $teacher_id = $_SESSION['user_id'];
@@ -33,7 +51,7 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TipTopLearn - My Schedules</title>
+    <title>Schedules</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -225,7 +243,7 @@ $conn->close();
         }
 
          /* Small Screens (Sidebar at the top) */
-         @media (max-width: 768px) {
+        @media (max-width: 768px) {
             .sidebar {
                 position: relative;
                 width: 100%;
@@ -264,20 +282,78 @@ $conn->close();
                 padding: 8px;
             }
         }
+
+        /* Sidebar transition for hide/show effect */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    width: 250px;
+    height: 100vh;
+    background-color: #66a3ff;
+    overflow-y: auto;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+}
+
+.sidebar.show {
+    transform: translateX(0);
+}
+
+/* Content shift when sidebar is visible */
+.content {
+    margin-left: 0;
+    transition: margin-left 0.3s ease-in-out;
+}
+
+.sidebar.show ~ .content {
+    margin-left: 250px;
+}
+
+/* Navbar button styles */
+.burger-btn {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1100;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+@media (min-width: 992px) {
+    .burger-btn {
+        display: none; 
+    }
+
+    .sidebar {
+        transform: translateX(0); 
+    }
+
+    .content {
+        margin-left: 250px; 
+    }
+}
     </style>
 </head>
 <body>
 
+<!-- Burger Button for Sidebar -->
+<button class="burger-btn" id="burgerToggle">☰</button>
+
 <!-- Sidebar -->
-<div class="sidebar d-flex flex-column">
+<div class="sidebar d-flex flex-column" id="sidebar">
     <div class="logo-section text-center mb-4">
         <img src="../images/logo.png" alt="Logo">
     </div>
 
     <div class="text-center mb-4">
     <img src="<?php echo $_SESSION['profile_picture'] ?? 'uploads/profile_pictures/default.jpg'; ?>" alt="Profile Picture" class="profile-picture">
-        <h3>Teacher's Panel</h3>
-        <p>Teacher</p>
+    <h6><?php echo htmlspecialchars($first_name . ' ' . $last_name); ?></h6>
     </div>
 <!-- Navigation Links inside Sidebar -->
     <nav>
@@ -342,6 +418,13 @@ $conn->close();
         <?php endif; ?>
     </div>
 </div>
+
+<script>
+    document.getElementById('burgerToggle').addEventListener('click', function () {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('show'); // Toggle 'show' class
+    });
+</script>
 
 <!-- Bootstrap JS and jQuery -->
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>

@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'db.php'; // Include database connection
+include '../db.php';
 
 // Redirect if not logged in as a student
 if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'student') {
@@ -49,6 +49,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['module_id'])) {
     $stmt = $conn->prepare($update_sql);
     $stmt->bind_param("ii", $viewed, $module_id);
     $stmt->execute();
+}
+
+// Fetch the logged-in user's details
+$user_id = $_SESSION['user_id'];
+$sql_user = "SELECT first_name, last_name FROM users WHERE id = ?";
+$stmt = $conn->prepare($sql_user);
+$stmt->bind_param('i', $user_id);
+$stmt->execute();
+$result_user = $stmt->get_result();
+
+if ($result_user && $result_user->num_rows > 0) {
+    $user_data = $result_user->fetch_assoc();
+    $first_name = $user_data['first_name'];
+    $last_name = $user_data['last_name'];
+} else {
+    $first_name = 'Student'; 
+    $last_name = '';         
 }
 ?>
 

@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'db.php'; // Include database connection
+include '../db.php';
 
 // Check if the user is logged in and is a teacher
 if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
@@ -184,7 +184,10 @@ $light_colors = [
 <body>
 
 <div class="container">
-    <h2>Create Quiz</h2>
+<div class="text-center">
+        <h2>Create Quiz</h2>
+    </div>
+
 
     <!-- Success or Error Messages -->
     <?php if (isset($_SESSION['success_message'])): ?>

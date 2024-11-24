@@ -1,7 +1,11 @@
 <?php
 session_start();
-include 'db.php';
+include '../db.php';
 
+if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
+    header("Location: index.php");
+    exit();
+}
 // Fetch all courses from the database
 $sql = "SELECT * FROM courses";
 $courses = [];
@@ -132,6 +136,23 @@ function getRandomColor() {
     ];      
     return $colors[array_rand($colors)];
 }
+
+// Fetch the logged-in user's details
+$user_id = $_SESSION['user_id'];
+$sql_user = "SELECT first_name, last_name FROM users WHERE id = ?";
+$stmt = $conn->prepare($sql_user);
+$stmt->bind_param('i', $user_id);
+$stmt->execute();
+$result_user = $stmt->get_result();
+
+if ($result_user && $result_user->num_rows > 0) {
+    $user_data = $result_user->fetch_assoc();
+    $first_name = $user_data['first_name'];
+    $last_name = $user_data['last_name'];
+} else {
+    $first_name = 'Student'; 
+    $last_name = '';         
+}
 ?>
 
 <!DOCTYPE html>
@@ -214,7 +235,7 @@ function getRandomColor() {
         }
 
         .card {
-            border: 1px solid #ddd; 
+            border: 2px solid black; 
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s ease;
@@ -313,20 +334,79 @@ function getRandomColor() {
                 padding: 8px;
             }
         }
+
+        /* Sidebar transition for hide/show effect */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    width: 250px;
+    height: 100vh;
+    background-color: #66a3ff;
+    overflow-y: auto;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+}
+
+.sidebar.show {
+    transform: translateX(0);
+}
+
+/* Content shift when sidebar is visible */
+.content {
+    margin-left: 0;
+    transition: margin-left 0.3s ease-in-out;
+}
+
+.sidebar.show ~ .content {
+    margin-left: 250px;
+}
+
+/* Navbar button styles */
+.burger-btn {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1100;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+@media (min-width: 992px) {
+    .burger-btn {
+        display: none; 
+    }
+
+    .sidebar {
+        transform: translateX(0); 
+    }
+
+    .content {
+        margin-left: 250px; 
+    }
+}
     </style>
 </head>
 <body>
 
+<!-- Burger Button for Sidebar -->
+<button class="burger-btn" id="burgerToggle">☰</button>
+
+
 <!-- Sidebar -->
-<div class="sidebar d-flex flex-column">
+<div class="sidebar d-flex flex-column" id="sidebar">
     <div class="logo-section text-center mb-4">
         <img src="../images/logo.png" alt="Logo">
     </div>
 
     <div class="text-center mb-4">
         <img src="<?php echo $_SESSION['profile_picture'] ?? 'uploads/profile_pictures/default.jpg'; ?>" alt="Profile Picture" class="profile-picture">
-        <h3>Teacher's Panel</h3>
-        <p>Teacher</p>
+        <h6><?php echo htmlspecialchars($first_name . ' ' . $last_name); ?></h6>
     </div>
 
     <nav>
@@ -360,11 +440,13 @@ function getRandomColor() {
 <!-- Main Content Area -->
 <div class="content">
     <div class="container position-relative">
-        <!-- Add New Course Button on Top-Right -->
-        <button class="btn btn-primary top-right-button" data-toggle="modal" data-target="#addCourseModal">Add New Course</button>
-
+    
         <h2 class="text-center mb-4">My Courses</h2>
-
+        <div class="d-flex justify-content-end my-3">
+    <button class="btn btn-primary" data-toggle="modal" data-target="#addCourseModal">
+        Add New Course
+    </button>
+    </div>
         <!-- Course List -->
         <div class="row">
     <?php foreach ($courses as $course): ?>
@@ -412,7 +494,7 @@ function getRandomColor() {
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="editCourseModalLabel">Edit Course</h5>
+                                <h5 class="modal-title" style="margin-left: 165px" id="editCourseModalLabel">Edit Course</h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
@@ -446,7 +528,7 @@ function getRandomColor() {
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="addCourseModalLabel">Add New Course</h5>
+                <h5 class="modal-title" style="margin-left: 144px" id="addCourseModalLabel">Add New Course</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -470,6 +552,13 @@ function getRandomColor() {
         </div>
     </div>
 </div>
+
+<script>
+    document.getElementById('burgerToggle').addEventListener('click', function () {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('show'); // Toggle 'show' class
+    });
+</script>
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>

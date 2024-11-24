@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'db.php'; // Include database connection
+include '../db.php';
 
 // Check if the user is logged in and is a teacher
 if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
