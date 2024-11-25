@@ -19,25 +19,6 @@ if ($result_modules->num_rows > 0) {
     }
 }
 
-// Handle Image Display
-if (isset($_GET['image_id'])) {
-    $image_id = intval($_GET['image_id']);
-    
-    // Fetch image data from the database
-    $image_sql = "SELECT file FROM modules WHERE id = ?";
-    $stmt = $conn->prepare($image_sql);
-    $stmt->bind_param("i", $image_id);
-    $stmt->execute();
-    $stmt->store_result();
-    $stmt->bind_result($image_data);
-    $stmt->fetch();
-    
-    // Set the appropriate header for image display (based on the file type)
-    header("Content-Type: image/jpeg"); 
-    echo $image_data;
-    exit;
-}
-
 // Handle the "viewed" checkbox submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['module_id'])) {
     $module_id = intval($_POST['module_id']);
@@ -91,6 +72,16 @@ if ($result_user && $result_user->num_rows > 0) {
             position: relative;
             background-color: #f9f9f9;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .module-file{
+            display: flex;             
+            flex-direction: column;   
+            justify-content: center;  
+            align-items: center;       
+            text-align: center;        
         }
 
         .module-card:hover {
@@ -104,16 +95,19 @@ if ($result_user && $result_user->num_rows > 0) {
 
         .module-description {
             margin-top: 10px;
+            flex-grow: 1;  /* Allow description to take up remaining space */
         }
 
-        .module-image {
+        .module-file {
             margin-top: 15px;
         }
 
+        /* Position the checkbox at the top right */
         .viewed-checkbox {
             position: absolute;
-            bottom: 15px;
+            top: 15px;
             right: 20px;
+            margin: 0;
         }
 
         .viewed-label {
@@ -129,6 +123,15 @@ if ($result_user && $result_user->num_rows > 0) {
             .module-title {
                 font-size: 1.2rem;
             }
+
+            .module-description {
+                font-size: 1rem;
+            }
+
+            .module-file img, .module-file video {
+                max-width: 100%;
+                height: auto;
+            }
         }
 
         @media (max-width: 576px) {
@@ -142,6 +145,11 @@ if ($result_user && $result_user->num_rows > 0) {
 
             .module-card {
                 padding: 10px;
+            }
+
+            .module-file img, .module-file video {
+                max-width: 100%;
+                height: auto;
             }
         }
     </style>
@@ -163,10 +171,38 @@ if ($result_user && $result_user->num_rows > 0) {
                 <h4 class="module-title"><?= htmlspecialchars($module['name'], ENT_QUOTES, 'UTF-8') ?></h4>
                 <p class="module-description"><?= htmlspecialchars($module['description'], ENT_QUOTES, 'UTF-8') ?></p>
 
-                <!-- Check if an image exists and display it -->
+                <!-- Check if a file exists and display it based on MIME type -->
                 <?php if (!empty($module['file'])): ?>
-                    <div class="module-image">
-                        <img src="view_image.php?image_id=<?= $module['id'] ?>" alt="Module Image" class="img-fluid" />
+                    <div class="module-file">
+                        <?php
+                        $file_url = "../Teacher/uploads/modules/" . htmlspecialchars($module['file'], ENT_QUOTES, 'UTF-8');
+                        $file_info = pathinfo($file_url);
+                        $file_extension = strtolower($file_info['extension']);
+                        
+                        // Display based on file extension
+                        if (in_array($file_extension, ['jpg', 'jpeg', 'png', 'gif'])) {
+                            // Image files
+                            echo '<img src="' . $file_url . '" alt="Module File" class="img-fluid" />';
+                        } elseif ($file_extension == 'pdf') {
+                            // PDF files
+                            echo '<embed src="' . $file_url . '" type="application/pdf" width="100%" height="400">';
+                        } elseif (in_array($file_extension, ['doc', 'docx'])) {
+                            // Word files
+                            echo '<iframe src="https://docs.google.com/gview?url=' . urlencode($file_url) . '&embedded=true" style="width: 100%; height: 400px;" frameborder="0"></iframe>';
+                        } elseif (in_array($file_extension, ['xls', 'xlsx'])) {
+                            // Excel files
+                            echo '<iframe src="https://view.officeapps.live.com/op/embed.aspx?src=' . urlencode($file_url) . '" width="100%" height="400" frameborder="0"></iframe>';
+                        } elseif (in_array($file_extension, ['mp4', 'avi', 'mov', 'mkv'])) {
+                            // Video files
+                            echo '<video width="100%" height="auto" controls>
+                                    <source src="' . $file_url . '" type="video/' . $file_extension . '">
+                                    Your browser does not support the video tag.
+                                </video>';
+                        } else {
+                            // Provide download link for other file types
+                            echo '<a href="' . $file_url . '" target="_blank" class="btn btn-primary">Download File</a>';
+                        }
+                        ?>
                     </div>
                 <?php endif; ?>
 
