@@ -15,7 +15,7 @@ if (!isset($_GET['course_id'])) {
     exit();
 }
 
-$course_id = $_GET['course_id']; // Safely get course_id
+$course_id = $_GET['course_id']; 
 
 // Handle create and edit module
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

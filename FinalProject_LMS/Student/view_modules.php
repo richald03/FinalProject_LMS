@@ -33,7 +33,7 @@ if (isset($_GET['image_id'])) {
     $stmt->fetch();
     
     // Set the appropriate header for image display (based on the file type)
-    header("Content-Type: image/jpeg"); // Adjust based on your image type (jpeg, png, etc.)
+    header("Content-Type: image/jpeg"); 
     echo $image_data;
     exit;
 }

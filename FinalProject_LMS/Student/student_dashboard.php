@@ -355,18 +355,45 @@ $conn->close();
 
 @media (min-width: 992px) {
     .burger-btn {
-        display: none; /* Hide burger button on larger screens */
+        display: none; 
     }
 
     .sidebar {
-        transform: translateX(0); /* Always visible on larger screens */
+        transform: translateX(0); 
     }
 
     .content {
-        margin-left: 250px; /* Content margin for larger screens */
+        margin-left: 250px;
     }
 }
 
+/* Sidebar fully expanded on small screens */
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%; 
+        height: 100v
+        background-color: #66a3ff;
+        transform: translateX(-100%); 
+        z-index: 1050; 
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .sidebar.show {
+        transform: translateX(0); 
+    }
+
+    .content {
+        display: block; 
+        transition: opacity 0.3s ease-in-out;
+    }
+
+    .content.hide {
+        display: none; 
+    }
+}
     </style>
 </head>
 <body>

@@ -397,6 +397,34 @@ if ($result_user && $result_user->num_rows > 0) {
         margin-left: 250px; /* Content margin for larger screens */
     }
 }
+
+/* Sidebar fully expanded on small screens */
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%; /* Occupy full width */
+        height: 100vh; /* Full height */
+        background-color: #66a3ff;
+        transform: translateX(-100%); /* Initially hidden */
+        z-index: 1050; /* Stay above other elements */
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .sidebar.show {
+        transform: translateX(0); /* Slide into view */
+    }
+
+    .content {
+        display: block; /* Default content visibility */
+        transition: opacity 0.3s ease-in-out;
+    }
+
+    .content.hide {
+        display: none; /* Hide content when sidebar is active */
+    }
+}
 </style>
 </head>
 <body>
