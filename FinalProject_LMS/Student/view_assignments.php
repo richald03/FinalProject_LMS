@@ -168,7 +168,6 @@ if ($result_user && $result_user->num_rows > 0) {
         }
     </style>
 </head>
-
 <body>
 
 <!-- Back to Dashboard Button -->

@@ -1,38 +1,20 @@
 <?php
 session_start();
-include '../db.php';
+include '../db.php';  // Ensure you have the correct database connection
 
 // Ensure the teacher is logged in
-if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
+if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'admin') {
     header("Location: index.php");
     exit();
 }
 
-// Fetch the logged-in user's details
-$user_id = $_SESSION['user_id'];
-$sql_user = "SELECT first_name, last_name FROM users WHERE id = ?";
-$stmt = $conn->prepare($sql_user);
-$stmt->bind_param('i', $user_id);
-$stmt->execute();
-$result_user = $stmt->get_result();
-
-if ($result_user && $result_user->num_rows > 0) {
-    $user_data = $result_user->fetch_assoc();
-    $first_name = $user_data['first_name'];
-    $last_name = $user_data['last_name'];
-} else {
-    $first_name = 'Student'; 
-    $last_name = '';         
-}
-
-
 // Get the logged-in teacher's ID
-$teacher_id = $_SESSION['user_id'];
+$admin_id = $_SESSION['user_id'];
 
 // Fetch scheduled events from the database for the logged-in teacher
-$query = "SELECT id, title, date, time, end_time, description FROM scheduled_events WHERE teacher_id = ? ORDER BY date, time";
+$query = "SELECT id, title, date, time, end_time, description FROM scheduled_events WHERE admin_id = ? ORDER BY date, time";
 $stmt = $conn->prepare($query);
-$stmt->bind_param("i", $teacher_id);
+$stmt->bind_param("i", $admin_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -51,7 +33,7 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Schedules</title>
+    <title>TipTopLearn - My Schedules</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -186,8 +168,63 @@ $conn->close();
             color: #721c24;
         }
 
+        /* Media Queries for Responsiveness */
+        @media (max-width: 768px) {
+            /* Sidebar for Small Screens */
+            .sidebar {
+                width: 200px;
+                position: relative;
+                height: auto;
+            }
+            .content {
+                margin-left: 0;
+                padding: 20px;
+            }
+            .sidebar .logo-section img {
+                width: 60px;
+                height: 60px;
+            }
+            .sidebar .profile-picture {
+                width: 60px;
+                height: 60px;
+            }
+            .sidebar nav a {
+                padding: 8px;
+                font-size: 14px;
+            }
+        }
 
-/* Sidebar transition for hide/show effect */
+        @media (max-width: 576px) {
+            /* Sidebar for Very Small Screens */
+            .sidebar {
+                width: 100%;
+                padding: 10px;
+            }
+            .content {
+                margin-left: 0;
+                padding: 10px;
+            }
+            .sidebar .logo-section img {
+                width: 50px;
+                height: 50px;
+            }
+            .sidebar .profile-picture {
+                width: 50px;
+                height: 50px;
+            }
+            .sidebar nav a {
+                font-size: 12px;
+                padding: 6px;
+            }
+            .event-list {
+                padding: 15px;
+            }
+            .event-item {
+                padding: 15px;
+            }
+        }
+
+        /* Sidebar transition for hide/show effect */
 .sidebar {
     position: fixed;
     top: 0;
@@ -215,7 +252,7 @@ $conn->close();
     margin-left: 250px;
 }
 
-/* Navbar button styles */
+
 .burger-btn {
     position: fixed;
     top: 10px;
@@ -231,34 +268,34 @@ $conn->close();
 
 @media (min-width: 992px) {
     .burger-btn {
-        display: none; 
+        display: none; /* Hide burger button on larger screens */
     }
 
     .sidebar {
-        transform: translateX(0); 
+        transform: translateX(0); /* Always visible on larger screens */
     }
 
     .content {
-        margin-left: 250px; 
+        margin-left: 250px; /* Content margin for larger screens */
     }
 }
 
-/* Sidebar fully expanded on small screens */
+
 @media (max-width: 768px) {
     .sidebar {
         position: fixed;
         top: 0;
         left: 0;
-        width: 100%; /* Occupy full width */
-        height: 100vh; /* Full height */
+        width: 100%; 
+        height: 100vh; 
         background-color: #66a3ff;
-        transform: translateX(-100%); /* Initially hidden */
+        transform: translateX(-100%); 
         z-index: 1050; /* Stay above other elements */
         transition: transform 0.3s ease-in-out;
     }
 
     .sidebar.show {
-        transform: translateX(0); /* Slide into view */
+        transform: translateX(0); 
     }
 
     .content {
@@ -270,6 +307,35 @@ $conn->close();
         display: none; /* Hide content when sidebar is active */
     }
 }
+
+
+@media (min-width 440px) {
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%; 
+        height: 100vh; 
+        background-color: #66a3ff;
+        transform: translateX(-100%); 
+        z-index: 1050; /* Stay above other elements */
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .sidebar.show {
+        transform: translateX(0); 
+    }
+
+    .content {
+        display: block; /* Default content visibility */
+        transition: opacity 0.3s ease-in-out;
+    }
+
+    .content.hide {
+        display: none; /* Hide content when sidebar is active */
+    }
+}
+
     </style>
 </head>
 <body>
@@ -283,34 +349,59 @@ $conn->close();
         <img src="../images/logo.png" alt="Logo">
     </div>
 
-    <div class="text-center mb-4">
-    <img src="<?php echo $_SESSION['profile_picture'] ?? 'uploads/profile_pictures/default.jpg'; ?>" alt="Profile Picture" class="profile-picture">
-    <h6><?php echo htmlspecialchars($first_name . ' ' . $last_name); ?></h6>
-    </div>
-<!-- Navigation Links inside Sidebar -->
+    <!-- Navigation Links inside Sidebar -->
     <nav>
-        <a href="teacher_dashboard.php" class="nav-link">Dashboard</a>
-        <a href="course_management.php" class="nav-link">Course Management</a>
-        <a href="student_management.php" class="nav-link">Student Management</a>
+        <a href="../Admin/index.php" class="nav-link">Dashboard</a>
 
         <div class="dropdown">
-            <a href="#" class="nav-link dropdown-toggle" id="gradingDropdown" role="button">Assignment/Grading</a>
+            <a href="#" class="nav-link dropdown-toggle" id="calendarDropdown" role="button">Announcements</a>
             <div class="dropdown-menu">
-                <a class="dropdown-item" href="assignment.php">Assignments</a>
-                <a class="dropdown-item" href="grading.php">Grading</a>
+                <a href="../Admin/calendar.php" class="nav-link">Calendar</a>
+                <a href="../Admin/scheduling.php" class="nav-link">Scheduling</a>
             </div>
         </div>
 
         <div class="dropdown">
-            <a href="#" class="nav-link dropdown-toggle" id="calendarDropdown" role="button">Calendar/Scheduling</a>
+            <a href="#" class="nav-link dropdown-toggle" id="calendarDropdown" role="button">Department Management</a>
             <div class="dropdown-menu">
-                <a class="dropdown-item" href="calendar.php">Calendar</a>
-                <a class="dropdown-item" href="scheduling.php">Scheduling</a>
+                <a class="dropdown-item" href="../Admin/view_department.php">View Departments</a>
+                <a class="dropdown-item" href="../Admin/manage_department.php">Manage Department</a>                
             </div>
         </div>
-    
 
-        <a href="update_profile.php" class="nav-link">Update Profile</a>
+        <div class="dropdown">
+            <a href="#" class="nav-link dropdown-toggle" id="calendarDropdown" role="button">Course Management</a>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" href="../Admin/view_course.php">View Courses</a>
+                <a class="dropdown-item" href="../Admin/manage_course.php">Manage Course</a>                
+            </div>
+        </div>
+
+        <div class="dropdown">
+            <a href="#" class="nav-link dropdown-toggle" id="calendarDropdown" role="button">Program Management</a>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" href="../Admin/view_program.php">View Programs</a>
+                <a class="dropdown-item" href="../Admin/manage_program.php">Manage Program</a>                
+            </div>
+        </div>
+        
+        <div class="dropdown">
+            <a href="#" class="nav-link dropdown-toggle" id="calendarDropdown" role="button">Student Management</a>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" href="../Admin/view_student.php">View Students</a>
+                <a class="dropdown-item" href="../Admin/manage_student.php">Manage Student</a>                
+            </div>
+        </div>
+
+        <div class="dropdown">
+            <a href="#" class="nav-link dropdown-toggle" id="calendarDropdown" role="button">Teacher Management</a>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" href="../Admin/view_teacher.php">View Teachers</a>
+                <a class="dropdown-item" href="../Admin/manage_teacher.php">Manage Teacher</a>                
+            </div>
+        </div>
+
+        <a href="../Admin/register.php" class="nav-link">Register</a>
     </nav>
 
     <!-- Logout Link -->

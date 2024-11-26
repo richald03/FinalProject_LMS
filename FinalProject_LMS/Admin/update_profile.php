@@ -1,32 +1,18 @@
 <?php
 session_start();
-include '../db.php';
 
-// Ensure the user is logged in and is a teacher
-if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'teacher') {
+// Include the database connection file
+require '../db.php'; 
+
+// Ensure the user is logged in
+if (!isset($_SESSION['user_id'])) {
     header("Location: index.php");
     exit();
 }
 
-// Fetch the logged-in user's details
+// Get the current user ID and type
 $user_id = $_SESSION['user_id'];
-$sql_user = "SELECT first_name, last_name FROM users WHERE id = ?";
-$stmt = $conn->prepare($sql_user);
-$stmt->bind_param('i', $user_id);
-$stmt->execute();
-$result_user = $stmt->get_result();
-
-if ($result_user && $result_user->num_rows > 0) {
-    $user_data = $result_user->fetch_assoc();
-    $first_name = $user_data['first_name'];
-    $last_name = $user_data['last_name'];
-} else {
-    $first_name = 'Student'; 
-    $last_name = '';         
-}
-
-// Get the teacher's current user ID
-$user_id = $_SESSION['user_id'];
+$user_type = $_SESSION['user_type'];
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -59,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $profile_picture_path = null;
         if (isset($_FILES['profile-picture']) && $_FILES['profile-picture']['error'] == 0) {
             $profile_picture = $_FILES['profile-picture'];
-            $target_dir = "../uploads/profile_pictures/"; 
+            $target_dir = "uploads/profile_pictures/"; // Target directory
             $target_file = $target_dir . basename($profile_picture["name"]);
             $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
@@ -81,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Upload the file if no errors
             if (empty($errors)) {
                 if (move_uploaded_file($profile_picture["tmp_name"], $target_file)) {
-                    $profile_picture_path = $target_file; 
+                    $profile_picture_path = $target_file; // Save the file path
                 } else {
                     $errors[] = "Sorry, there was an error uploading your file.";
                 }
@@ -125,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     // Set success message in the session
                     $_SESSION['success_message'] = "Profile updated successfully!";
-                    header("Location: ../Teacher/update_profile.php");
+                    header("Location: update_profile.php");
                     exit();
                 } else {
                     $errors[] = "Error updating profile: " . $stmt->error;
@@ -145,59 +131,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update Profile</title>
+    <title>TipTopLearn - Update Profile</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
-    /* Custom Styles for Sidebar */
-    .sidebar {
-        width: 250px;
-        background-color: #66a3ff; 
-        color: #fff;
-        height: 100vh;
-        padding: 20px;
-        position: fixed;
-    }
+        /* Custom Styles for Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: #66a3ff; 
+            color: #fff;
+            height: 100vh;
+            padding: 20px;
+            position: fixed;
+        }
+        .sidebar .logo-section img {
+            width: 80px;
+            height: 80px;
+        }
+        .sidebar .logo-section h2 {
+            font-size: 24px;
+            color: #333;
+        }
+        .sidebar .profile-picture {
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+        }
+        .sidebar nav a {
+            display: block;
+            color: #fff;
+            text-decoration: none;
+            padding: 10px;
+            text-align: center;
+            margin-top: 10px;
+            border-radius: 5px;
+            background-color: #007bff;
+        }
+        .sidebar nav a:hover {
+            background-color: #0056b3;
+        }
 
-    .sidebar .logo-section img {
-        width: 80px;
-        height: 80px;
-    }
-
-    .sidebar .logo-section h2 {
-        font-size: 24px;
-        color: #333;
-    }
-
-    .sidebar .profile-picture {
-        border-radius: 50%;
-        width: 80px;
-        height: 80px;
-    }
-
-    .sidebar nav a {
-        display: block;
-        color: #fff;
-        text-decoration: none;
-        padding: 10px;
-        text-align: center;
-        margin-top: 10px;
-        border-radius: 5px;
-        background-color: #007bff;
-    }
-
-    .sidebar nav a:hover {
-        background-color: #0056b3;
-    }
-
-    /* Dropdown hover styles */
-    .sidebar .dropdown:hover .dropdown-menu {
+        /* Dropdown hover styles */
+        .sidebar .dropdown:hover .dropdown-menu {
             display: block;
         }
         .sidebar .dropdown .dropdown-menu {
             display: none;
             position: static;
             float: none;
-            background-color: #66a3ff; 
+            background-color: #66a3ff; /* Match the sidebar background */
         }
         .sidebar .dropdown .dropdown-item {
             color: #fff;
@@ -207,165 +188,104 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background-color: #0056b3;
         }
 
-    /* Custom Styles for Content */
-    .content {
-        margin-left: 250px;
-        padding: 20px;
-    }
-
-    .update-profile-form {
-        background-color: #fff;
-        padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-        max-width: 600px;
-        margin: 0 auto;
-    }
-
-    .update-profile-form h2 {
-        color: #007bff;
-        margin-bottom: 20px;
-        text-align: center;
-    }
-
-    .cancel-btn {
-        width: 100%;
-        padding: 12px;
-        background-color: #f0f0f0;
-        border: 1px solid #ddd;
-        color: #333;
-        font-size: 16px;
-    }
-
-    .cancel-btn:hover {
-        background-color: #e1e1e1;
-    }
-
-
-/* Sidebar transition for hide/show effect */
-.sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1000;
-    width: 250px;
-    height: 100vh;
-    background-color: #66a3ff;
-    overflow-y: auto;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease-in-out;
-}
-
-.sidebar.show {
-    transform: translateX(0);
-}
-
-/* Content shift when sidebar is visible */
-.content {
-    margin-left: 0;
-    transition: margin-left 0.3s ease-in-out;
-}
-
-.sidebar.show ~ .content {
-    margin-left: 250px;
-}
-
-/* Navbar button styles */
-.burger-btn {
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    z-index: 1100;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-@media (min-width: 992px) {
-    .burger-btn {
-        display: none; 
-    }
-
-    .sidebar {
-        transform: translateX(0); 
-    }
-
-    .content {
-        margin-left: 250px; 
-    }
-}
-
-/* Sidebar fully expanded on small screens */
-@media (max-width: 768px) {
-    .sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%; /* Occupy full width */
-        height: 100vh; /* Full height */
-        background-color: #66a3ff;
-        transform: translateX(-100%); /* Initially hidden */
-        z-index: 1050; /* Stay above other elements */
-        transition: transform 0.3s ease-in-out;
-    }
-
-    .sidebar.show {
-        transform: translateX(0); /* Slide into view */
-    }
-
-    .content {
-        display: block; /* Default content visibility */
-        transition: opacity 0.3s ease-in-out;
-    }
-
-    .content.hide {
-        display: none; /* Hide content when sidebar is active */
-    }
-}
-</style>
+        /* Custom Styles for Content */
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        .update-profile-form {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .update-profile-form h2 {
+            color: #007bff;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .cancel-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            color: #333;
+            font-size: 16px;
+        }
+        .cancel-btn:hover {
+            background-color: #e1e1e1;
+        }
+    </style>
 </head>
 <body>
 
-<!-- Burger Button for Sidebar -->
-<button class="burger-btn" id="burgerToggle">☰</button>
-
 <!-- Sidebar -->
-<div class="sidebar d-flex flex-column" id="sidebar">
+<div class="sidebar d-flex flex-column">
     <div class="logo-section text-center mb-4">
         <img src="../images/logo.png" alt="Logo">
     </div>
 
     <div class="text-center mb-4">
-    <img src="<?php echo $_SESSION['profile_picture'] ?? 'uploads/profile_pictures/default.jpg'; ?>" alt="Profile Picture" class="profile-picture">
-    <h6><?php echo htmlspecialchars($first_name . ' ' . $last_name); ?></h6>
+        <img src="<?php echo $_SESSION['profile_picture'] ?? 'uploads/profile_pictures/default.jpg'; ?>" alt="Profile Picture" class="profile-picture">
+        <h3>Admin Panel</h3>
     </div>
 
     <!-- Navigation Links inside Sidebar -->
     <nav>
-        <a href="teacher_dashboard.php" class="nav-link">Dashboard</a>
-        <a href="course_management.php" class="nav-link">Course Management</a>
-        <a href="student_management.php" class="nav-link">Student Management</a>
+        <a href="../Admin/index.php" class="nav-link">Dashboard</a>
 
         <div class="dropdown">
-            <a href="#" class="nav-link dropdown-toggle" id="gradingDropdown" role="button">Assignment/Grading</a>
+            <a href="#" class="nav-link dropdown-toggle" id="calendarDropdown" role="button">Announcements</a>
             <div class="dropdown-menu">
-                <a class="dropdown-item" href="assignment.php">Assignments</a>
-                <a class="dropdown-item" href="grading.php">Grading</a>
+                <a href="../Admin/calendar.php" class="nav-link">Calendar</a>
+                <a href="../Admin/scheduling.php" class="nav-link">Scheduling</a>
             </div>
         </div>
 
         <div class="dropdown">
-            <a href="#" class="nav-link dropdown-toggle" id="calendarDropdown" role="button">Calendar/Scheduling</a>
+            <a href="#" class="nav-link dropdown-toggle" id="calendarDropdown" role="button">Department Management</a>
             <div class="dropdown-menu">
-                <a class="dropdown-item" href="calendar.php">Calendar</a>
-                <a class="dropdown-item" href="scheduling.php">Scheduling</a>
+                <a class="dropdown-item" href="../Admin/view_department.php">View Departments</a>
+                <a class="dropdown-item" href="../Admin/manage_department.php">Manage Department</a>                
             </div>
         </div>
 
-        <a href="update_profile.php" class="nav-link">Update Profile</a>
+        <div class="dropdown">
+            <a href="#" class="nav-link dropdown-toggle" id="calendarDropdown" role="button">Course Management</a>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" href="../Admin/view_course.php">View Courses</a>
+                <a class="dropdown-item" href="../Admin/manage_course.php">Manage Course</a>                
+            </div>
+        </div>
+
+        <div class="dropdown">
+            <a href="#" class="nav-link dropdown-toggle" id="calendarDropdown" role="button">Program Management</a>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" href="../Admin/view_program.php">View Programs</a>
+                <a class="dropdown-item" href="../Admin/manage_program.php">Manage Program</a>                
+            </div>
+        </div>
+        
+        <div class="dropdown">
+            <a href="#" class="nav-link dropdown-toggle" id="calendarDropdown" role="button">Student Management</a>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" href="../Admin/view_student.php">View Students</a>
+                <a class="dropdown-item" href="../Admin/manage_student.php">Manage Student</a>                
+            </div>
+        </div>
+
+        <div class="dropdown">
+            <a href="#" class="nav-link dropdown-toggle" id="calendarDropdown" role="button">Teacher Management</a>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" href="../Admin/view_teacher.php">View Teachers</a>
+                <a class="dropdown-item" href="../Admin/manage_teacher.php">Manage Teacher</a>                
+            </div>
+        </div>
+
+        <a href="../Admin/register.php" class="nav-link">Register</a>
+        <a href="../Admin/update_profile.php" class="nav-link">Update Profile</a>
     </nav>
 
     <!-- Logout Link -->
@@ -387,11 +307,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <!-- Handle errors and show them to the user -->
         <?php if (!empty($errors)): ?>
-        <div class="alert alert-danger">
-        <?php foreach ($errors as $error): ?>
-        <p><?php echo $error; ?></p>
-        <?php endforeach; ?>
-        </div>
+            <div class="alert alert-danger">
+                <?php foreach ($errors as $error): ?>
+                    <p><?php echo $error; ?></p>
+                <?php endforeach; ?>
+            </div>
         <?php endif; ?>
 
         <form method="POST" enctype="multipart/form-data">
@@ -452,14 +372,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Cancel button to go back to the dashboard
     document.getElementById('cancel-button').addEventListener('click', function() {
-        window.location.href = 'teacher_dashboard.php';  // Go back to the dashboard page
-    });
-
-    document.getElementById('burgerToggle').addEventListener('click', function () {
-        const sidebar = document.getElementById('sidebar');
-        sidebar.classList.toggle('show'); // Toggle 'show' class
+        window.location.href = '../Admin/update_profile.php';  // Go back to the dashboard page
     });
 </script>
-
-</body>
-</html>

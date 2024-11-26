@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Redirect based on user role
             if ($user['user_type'] === 'admin') {
-                header('Location: ../FinalProject_LMS/Admin/admin_dashboard.php');
+                header('Location: ../FinalProject_LMS/Admin/index.php');
             } elseif ($user['user_type'] === 'teacher') {
                 header('Location: ../FinalProject_LMS/Teacher/teacher_dashboard.php');
             } elseif ($user['user_type'] === 'student') {

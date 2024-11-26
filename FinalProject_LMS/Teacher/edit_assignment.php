@@ -250,23 +250,7 @@ if ($result_user && $result_user->num_rows > 0) {
             margin-top: 20px;
         }
 
-        @media (max-width: 768px) {
-            .form-container {
-                width: 100%;
-                padding: 20px;
-            }
-
-            .content {
-                margin-left: 0;
-                padding: 20px;
-            }
-
-            .btn-custom-save {
-                font-size: 14px;
-            }
-        }
-
-        /* Sidebar transition for hide/show effect */
+ /* Sidebar transition for hide/show effect */
 .sidebar {
     position: fixed;
     top: 0;

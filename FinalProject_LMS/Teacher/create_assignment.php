@@ -212,66 +212,7 @@ if ($result_user && $result_user->num_rows > 0) {
             margin-bottom: 20px;
         }
 
-        /* Make Sidebar and Content Responsive */
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
-                padding: 15px;
-            }
-            .content {
-                margin-left: 0;
-                padding: 15px;
-            }
-            .form-container {
-                padding: 20px;
-            }
-            .form-container form button {
-                padding: 10px;
-            }
-            .sidebar .logo-section img {
-                width: 60px;
-                height: 60px;
-            }
-            .sidebar nav a {
-                padding: 8px;
-                font-size: 14px;
-            }
-            .sidebar .profile-picture {
-                width: 60px;
-                height: 60px;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .sidebar {
-                width: 100%;
-                padding: 10px;
-            }
-            .sidebar nav a {
-                padding: 6px;
-                font-size: 12px;
-            }
-            .form-container {
-                padding: 15px;
-            }
-            .form-container form input,
-            .form-container form textarea,
-            .form-container form button {
-                padding: 8px;
-            }
-            .sidebar .logo-section img {
-                width: 50px;
-                height: 50px;
-            }
-            .sidebar .profile-picture {
-                width: 50px;
-                height: 50px;
-            }
-        }
-
-        /* Sidebar transition for hide/show effect */
+/* Sidebar transition for hide/show effect */
 .sidebar {
     position: fixed;
     top: 0;
@@ -354,7 +295,6 @@ if ($result_user && $result_user->num_rows > 0) {
         display: none; /* Hide content when sidebar is active */
     }
 }
-
     </style>
 </head>
 <body>

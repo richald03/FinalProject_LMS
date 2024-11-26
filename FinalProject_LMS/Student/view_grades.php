@@ -96,91 +96,6 @@ $conn->close();
             padding: 20px;
         }
 
-        /* Mobile View - Collapse Sidebar */
-        @media (max-width: 992px) {
-            .sidebar {
-                position: absolute;
-                width: 100%;
-                height: auto;
-                padding: 10px;
-            }
-
-            .content {
-                margin-left: 0;
-            }
-
-            .sidebar nav a {
-                padding: 8px;
-                font-size: 14px;
-            }
-
-            .sidebar .profile-picture {
-                width: 60px;
-                height: 60px;
-            }
-        }
-
-        /* Smaller Screens (for mobile devices) */
-        @media (max-width: 768px) {
-            .content {
-                position: relative;
-                width: 100%;
-                height: auto;
-                padding: 10px;;
-            }
-
-            .sidebar nav a {
-                padding: 8px;
-                font-size: 14px;
-            }
-
-            /* Profile Picture Scaling */
-            .sidebar .profile-picture {
-                width: 50px;
-                height: 50px;
-            }
-        }
-
-        /* Small Screens (Sidebar at the top) */
-        @media (max-width: 768px) {
-            .sidebar {
-                position: relative;
-                width: 100%;
-                height: auto;
-                padding: 10px;
-            }
-
-            .content {
-                margin-left: 0;
-            }
-
-            .top-right-button {
-                position: relative;
-                top: 0;
-                right: 0;
-            }
-
-            .sidebar nav a {
-                padding: 8px;
-                font-size: 14px;
-            }
-        }
-        /* Modal responsiveness */
-        @media (max-width: 576px) {
-            .modal-dialog {
-                max-width: 100%;
-                margin: 15px;
-            }
-
-            .modal-body {
-                padding: 10px;
-            }
-
-            .form-control {
-                font-size: 14px;
-                padding: 8px;
-            }
-        }
         /* Grades Table Styling */
         .grades-table {
             margin-top: 30px;
@@ -224,7 +139,7 @@ $conn->close();
             }
         }
 
-        /* Sidebar transition for hide/show effect */
+/* Sidebar transition for hide/show effect */
 .sidebar {
     position: fixed;
     top: 0;

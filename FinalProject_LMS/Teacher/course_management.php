@@ -276,66 +276,7 @@ if ($result_user && $result_user->num_rows > 0) {
             background-color: #0056b3;
         }
 
-        /* Large Screens (Sidebar fixed on the left) */
-        @media (min-width: 768px) {
-            .sidebar {
-                position: fixed;
-                height: 100vh;
-            }
-
-            .content {
-                margin-left: 250px; 
-            }
-
-            .top-right-button {
-                position: absolute;
-                top: 20px;
-                right: 20px;
-            }
-        }
-
-        /* Small Screens (Sidebar at the top) */
-        @media (max-width: 768px) {
-            .sidebar {
-                position: relative;
-                width: 100%;
-                height: auto;
-                padding: 10px;
-            }
-
-            .content {
-                margin-left: 0;
-            }
-
-            .top-right-button {
-                position: relative;
-                top: 0;
-                right: 0;
-            }
-
-            .sidebar nav a {
-                padding: 8px;
-                font-size: 14px;
-            }
-        }
-        /* Modal responsiveness */
-        @media (max-width: 576px) {
-            .modal-dialog {
-                max-width: 100%;
-                margin: 15px;
-            }
-
-            .modal-body {
-                padding: 10px;
-            }
-
-            .form-control {
-                font-size: 14px;
-                padding: 8px;
-            }
-        }
-
-        /* Sidebar transition for hide/show effect */
+/* Sidebar transition for hide/show effect */
 .sidebar {
     position: fixed;
     top: 0;

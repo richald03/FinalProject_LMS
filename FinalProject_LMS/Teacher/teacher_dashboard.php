@@ -119,6 +119,10 @@ $conn->close();
             background-color: #0056b3;
         }
 
+        #sidebar .btn{
+        margin-top: 80px;
+        }
+
         /* Dropdown hover styles */
         .sidebar .dropdown:hover .dropdown-menu {
             display: block;
@@ -246,47 +250,6 @@ $conn->close();
                 object-fit: contain; 
         }
 
-        /* Small Screens (Sidebar at the top) */
-        @media (max-width: 768px) {
-            .sidebar {
-                position: relative;
-                width: 100%;
-                height: auto;
-                padding: 10px;
-            }
-
-            .content {
-                margin-left: 0;
-            }
-
-            .top-right-button {
-                position: relative;
-                top: 0;
-                right: 0;
-            }
-
-            .sidebar nav a {
-                padding: 8px;
-                font-size: 14px;
-            }
-        }
-        /* Modal responsiveness */
-        @media (max-width: 576px) {
-            .modal-dialog {
-                max-width: 100%;
-                margin: 15px;
-            }
-
-            .modal-body {
-                padding: 10px;
-            }
-
-            .form-control {
-                font-size: 14px;
-                padding: 8px;
-            }
-        }
-
         .table img {
             width: 100%;
             max-width: 120px;
@@ -303,7 +266,7 @@ $conn->close();
             margin-bottom: 10px;
         }
 
-        /* Sidebar transition for hide/show effect */
+/* Sidebar transition for hide/show effect */
 .sidebar {
     position: fixed;
     top: 0;
@@ -359,8 +322,48 @@ $conn->close();
     }
 }
 
+@media (max-width: 420px) {
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 76.5%; /* Occupy full width */
+    height: 102vh; /* Full height */
+    background-color: #66a3ff;
+    transform: translateX(-100%); /* Initially hidden */
+    z-index: 1050; /* Stay above other elements */
+    transition: transform 0.3s ease-in-out;
+    
+}
+
+#sidebar .btn{
+    margin-top: 300px;
+    width: 400px;
+}
+
+.sidebar nav a {
+    width: 370px;
+}
+
+.sidebar.show {
+    transform: translateX(0); /* Slide into view */
+}
+
+.content {
+    display: block; /* Default content visibility */
+    transition: opacity 0.3s ease-in-out;
+}
+
+.content.hide {
+    display: none; /* Hide content when sidebar is active */
+}
+}
+
+
 /* Sidebar fully expanded on small screens */
 @media (max-width: 768px) {
+
     .sidebar {
         position: fixed;
         top: 0;
@@ -371,6 +374,10 @@ $conn->close();
         transform: translateX(-100%); /* Initially hidden */
         z-index: 1050; /* Stay above other elements */
         transition: transform 0.3s ease-in-out;
+    }
+
+    .sidebar nav a {
+        width: 410px;
     }
 
     .sidebar.show {
@@ -386,7 +393,7 @@ $conn->close();
         display: none; /* Hide content when sidebar is active */
     }
 }
-    </style>
+</style>
 </head>
 <body>
 
@@ -430,7 +437,7 @@ $conn->close();
     </nav>
 
     <!-- Logout Link -->
-    <a href="logout.php" class="btn btn-danger mt-auto">Logout</a>
+    <a href="logout.php" class="btn btn-danger mt-auto">Logout</a>    
 </div>
 
 <!-- Main Content -->

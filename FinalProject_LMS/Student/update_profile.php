@@ -239,110 +239,7 @@ if ($result_user && $result_user->num_rows > 0) {
         background-color: #e1e1e1;
     }
 
-    /* Responsive Styles */
-    @media (max-width: 1024px) {
-        .sidebar {
-            width: 200px;
-        }
-
-        .content {
-            margin-left: 200px;
-        }
-    }
-
-    @media (max-width: 768px) {
-        /* Sidebar and Content Layout */
-        .sidebar {
-            width: 100%;
-            position: static;
-            height: auto;
-            padding: 15px;
-        }
-
-        .content {
-            margin-left: 0;
-        }
-
-        /* Form adjustments */
-        .update-profile-form {
-            width: 90%;
-            padding: 20px;
-        }
-
-        .cancel-btn {
-            width: 100%;
-        }
-    }
-
-    @media (max-width: 576px) {
-        /* Profile Picture in Sidebar */
-        .sidebar .profile-picture {
-            width: 60px;
-            height: 60px;
-        }
-
-        .sidebar .logo-section img {
-            width: 60px;
-            height: 60px;
-        }
-
-        .sidebar nav a {
-            padding: 8px;
-        }
-
-        .update-profile-form {
-            width: 100%;
-            padding: 15px;
-        }
-
-        /* Buttons */
-        .cancel-btn {
-            padding: 10px;
-        }
-    }
-
-     /* Small Screens (Sidebar at the top) */
-    @media (max-width: 768px) {
-            .sidebar {
-                position: relative;
-                width: 100%;
-                height: auto;
-                padding: 10px;
-            }
-
-            .content {
-                margin-left: 0;
-            }
-
-            .top-right-button {
-                position: relative;
-                top: 0;
-                right: 0;
-            }
-
-            .sidebar nav a {
-                padding: 8px;
-                font-size: 14px;
-            }
-        }
-        /* Modal responsiveness */
-        @media (max-width: 576px) {
-            .modal-dialog {
-                max-width: 100%;
-                margin: 15px;
-            }
-
-            .modal-body {
-                padding: 10px;
-            }
-
-            .form-control {
-                font-size: 14px;
-                padding: 8px;
-            }
-        }
-
-        /* Sidebar transition for hide/show effect */
+/* Sidebar transition for hide/show effect */
 .sidebar {
     position: fixed;
     top: 0;
@@ -398,31 +295,59 @@ if ($result_user && $result_user->num_rows > 0) {
     }
 }
 
-/* Sidebar fully expanded on small screens */
+@media (max-width: 430px) {
+    #sidebar {
+        top: 0;
+        left: 0;
+        width: 77.5%; 
+        height: 100%;
+        background-color: #66a3ff;  
+    }
+
+    .sidebar a {
+        width: 390px;
+    }
+}
+
+@media (max-width: 380px) {
+    #sidebar {
+        top: 0;
+        left: 0;
+        width: 70%; 
+        height: 100%;
+        background-color: #66a3ff;  
+    }
+
+    .sidebar a {
+        width: 340px;
+    }
+}
+
+/* Sidebar fuly expanded on small screens */
 @media (max-width: 768px) {
     .sidebar {
         position: fixed;
         top: 0;
         left: 0;
-        width: 100%; /* Occupy full width */
-        height: 100vh; /* Full height */
+        width: 100%; 
+        height: 100vh;
         background-color: #66a3ff;
-        transform: translateX(-100%); /* Initially hidden */
-        z-index: 1050; /* Stay above other elements */
+        transform: translateX(-100%); 
+        z-index: 1050; 
         transition: transform 0.3s ease-in-out;
     }
 
     .sidebar.show {
-        transform: translateX(0); /* Slide into view */
+        transform: translateX(0); 
     }
 
     .content {
-        display: block; /* Default content visibility */
+        display: block; 
         transition: opacity 0.3s ease-in-out;
     }
 
     .content.hide {
-        display: none; /* Hide content when sidebar is active */
+        display: none; 
     }
 }
 </style>
